@@ -1,0 +1,50 @@
+Incident 001
+
+Rack: Rack18
+
+Symptoms:
+CRC errors
+High temperature
+Packet loss
+
+Resolution:
+Replace cooling fan
+Reseat SFP module
+
+Status:
+Resolved
+
+----------------------------------------
+
+Incident 002
+
+Rack: Rack31
+
+Symptoms:
+Interface resets
+Power fluctuations
+
+Resolution:
+Replace PDU
+
+Status:
+Resolved
+
+----------------------------------------
+
+Incident 003
+
+Rack: Rack22
+
+Symptoms:
+CRC errors
+Temperature spike
+Packet drops
+
+Resolution:
+Inspect airflow
+Replace SFP module
+Verify switch fan operation
+
+Status:
+Resolved

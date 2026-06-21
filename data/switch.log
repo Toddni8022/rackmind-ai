@@ -1,0 +1,25 @@
+2026-06-21 18:00:01 INFO Switch01 Boot complete
+2026-06-21 18:01:10 INFO Rack22 Interface Gi1/0/12 Link Up
+2026-06-21 18:02:15 INFO Rack22 Port utilization 24%
+2026-06-21 18:03:40 INFO Rack22 Temperature 72F
+2026-06-21 18:05:11 WARNING CRC error detected on Gi1/0/12
+2026-06-21 18:05:13 WARNING CRC error detected on Gi1/0/12
+2026-06-21 18:05:15 WARNING CRC error detected on Gi1/0/12
+2026-06-21 18:05:17 WARNING Packet drops increasing
+2026-06-21 18:06:01 INFO Rack22 Temperature 77F
+2026-06-21 18:07:10 WARNING Fan speed below threshold
+2026-06-21 18:08:20 INFO Rack22 Temperature 82F
+2026-06-21 18:09:00 ERROR Temperature threshold exceeded (87F)
+2026-06-21 18:09:15 ERROR Interface Gi1/0/12 reset initiated
+2026-06-21 18:09:45 INFO Interface reset complete
+2026-06-21 18:10:20 WARNING CRC error detected on Gi1/0/12
+2026-06-21 18:10:30 WARNING Packet loss 2.1%
+2026-06-21 18:11:00 INFO Rack22 Temperature 91F
+2026-06-21 18:11:10 ERROR Critical temperature threshold exceeded
+2026-06-21 18:11:45 WARNING Cooling efficiency degraded
+2026-06-21 18:12:30 INFO Rack22 Power draw 4.8kW
+2026-06-21 18:13:00 ERROR Interface Gi1/0/12 reset initiated
+2026-06-21 18:13:20 INFO Interface recovered
+2026-06-21 18:14:05 WARNING CRC error detected on Gi1/0/12
+2026-06-21 18:14:50 WARNING Packet drops increasing
+2026-06-21 18:15:00 INFO Diagnostics complete
