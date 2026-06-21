@@ -1,4 +1,5 @@
 import streamlit as st
+from agents.coordinator import analyze_issue
 
 st.set_page_config(
     page_title="RackMind AI",
@@ -10,6 +11,7 @@ st.title("🖥️ RackMind AI")
 st.caption("Autonomous Data Center Operations Copilot")
 
 with st.sidebar:
+
     st.header("Infrastructure Files")
 
     runbook = st.file_uploader(
@@ -29,15 +31,13 @@ with st.sidebar:
 
     st.divider()
 
-    st.subheader("Agents")
+    st.subheader("Agent Status")
 
-    st.success("🟢 Coordinator")
-
-    st.info("⚪ Runbook")
-
-    st.info("⚪ Log")
-
-    st.info("⚪ Sensor")
+    st.success("🟢 Coordinator Agent Online")
+    st.info("⚪ Runbook Agent")
+    st.info("⚪ Log Agent")
+    st.info("⚪ Sensor Agent")
+    st.info("⚪ Report Agent")
 
 st.header("Ask RackMind")
 
@@ -49,34 +49,12 @@ question = st.text_area(
 if st.button("Analyze"):
 
     if question.strip() == "":
-        st.warning("Enter an infrastructure problem.")
+        st.warning("Please enter an infrastructure issue.")
+
     else:
 
-        st.subheader("Root Cause")
+        with st.spinner("Coordinator Agent Thinking..."):
 
-        st.write(
-            "Likely cooling degradation causing intermittent network failures."
-        )
+            answer = analyze_issue(question)
 
-        st.subheader("Recommended Actions")
-
-        st.markdown("""
-1. Verify rack airflow
-
-2. Inspect fan status
-
-3. Check SFP modules
-
-4. Review switch logs
-
-5. Monitor for 15 minutes
-""")
-
-        st.subheader("Priority")
-
-        st.error("HIGH")
-
-        st.subheader("Confidence")
-
-        st.progress(91)
-        st.write("91%")
+        st.markdown(answer)
