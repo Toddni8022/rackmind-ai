@@ -23,23 +23,27 @@ def analyze_log(uploaded_file):
         if "ERROR" in upper:
             counts["errors"] += 1
 
-        if "CRC" in upper:
+        if "CRC ERROR" in upper:
             counts["crc_errors"] += 1
 
-        if "RESET" in upper:
+        if "RESET INITIATED" in upper:
             counts["interface_resets"] += 1
 
         if (
-            "CRC" in upper
-            or "ERROR" in upper
-            or "TEMPERATURE" in upper
-            or "RESET" in upper
+            "CRC ERROR" in upper
+            or "TEMPERATURE THRESHOLD" in upper
+            or "CRITICAL TEMPERATURE" in upper
+            or "RESET INITIATED" in upper
         ):
             timeline.append(line)
 
         if "TEMPERATURE" in upper:
 
-            for word in line.replace("(", " ").replace(")", " ").split():
+            for word in (
+                line.replace("(", " ")
+                .replace(")", " ")
+                .split()
+            ):
 
                 if word.endswith("F"):
 
