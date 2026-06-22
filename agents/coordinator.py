@@ -1,52 +1,40 @@
-import os
-from dotenv import load_dotenv
-from google import genai
-
-load_dotenv()
-
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
+from agents.log_agent import analyze_log_summary
+from agents.report_agent import generate_incident_report
 
 
-def analyze_issue(issue: str) -> str:
-    """
-    RackMind AI Coordinator Agent
+class CoordinatorAgent:
 
-    This agent performs the initial infrastructure analysis.
-    Future versions will coordinate specialized Runbook,
-    Log, Sensor, and Report agents.
-    """
+    def __init__(self):
 
-    prompt = f"""
-You are a Senior Data Center Infrastructure Engineer.
+        self.name = "RackMind Coordinator"
 
-Analyze the following issue.
+    def analyze(
+        self,
+        log_summary=None,
+        runbook_context="",
+        sensor_context="",
+    ):
 
-Return your answer using this format:
+        log_report = ""
 
-# Root Cause
+        if log_summary:
 
-# Likely Impact
+            log_report = analyze_log_summary(log_summary)
 
-# Recommended Actions
+        final_report = generate_incident_report(
+            log_report=log_report,
+            runbook_report=runbook_context,
+            sensor_report=sensor_context,
+        )
 
-- item 1
-- item 2
-- item 3
+        return final_report
 
-# Priority
 
-# Confidence Score
+coordinator = CoordinatorAgent()
 
-Issue:
 
-{issue}
-"""
+def coordinate_log_workflow(summary):
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
+    return coordinator.analyze(
+        log_summary=summary
     )
-
-    return response.text

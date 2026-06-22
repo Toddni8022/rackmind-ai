@@ -4,14 +4,14 @@ import streamlit as st
 def show_dashboard():
 
     st.header("🏠 Dashboard")
-    st.caption("Autonomous Network Operations Center")
+    st.caption("Autonomous Network Operations Copilot")
 
     c1, c2, c3, c4 = st.columns(4)
 
     c1.metric("🟢 Healthy", "124")
     c2.metric("🟡 Warning", "3")
     c3.metric("🔴 Critical", "1")
-    c4.metric("🤖 Agents", "4")
+    c4.metric("🤖 Agents", "5")
 
     st.divider()
 
@@ -21,44 +21,57 @@ def show_dashboard():
 
         st.subheader("Agent Status")
 
-        st.success("🟢 Coordinator Agent Online")
+        st.success("🟢 Coordinator Agent")
 
-        st.success("🟢 Runbook Agent Online")
+        st.success("🟢 Log Agent")
 
-        st.success("🟢 Log Agent Online")
+        st.success("🟢 Runbook Agent")
 
-        st.success("🟢 Sensor Agent Online")
+        st.success("🟢 Sensor Agent")
+
+        st.success("🟢 Report Agent")
 
     with right:
 
-        st.subheader("Recent Activity")
+        st.subheader("Capabilities")
 
-        st.write("✅ Log analysis available")
+        st.write("✅ Infrastructure Log Analysis")
 
-        st.write("✅ Runbook search available")
+        st.write("✅ Runbook Search")
 
-        st.write("✅ Sensor analytics available")
+        st.write("✅ Sensor Analytics")
 
-        st.write("🚧 Google ADK orchestration in progress")
+        st.write("✅ Executive Incident Reports")
+
+        st.write("🚧 Google ADK Integration")
 
     st.divider()
 
-    st.subheader("RackMind AI")
+    st.subheader("Architecture")
+
+    st.code(
+        """
+User
+ │
+ ▼
+Coordinator Agent
+ │
+ ├── Log Agent
+ ├── Runbook Agent
+ ├── Sensor Agent
+ └── Report Agent
+ │
+ ▼
+Executive Incident Report
+"""
+    )
+
+    st.divider()
 
     st.info(
         """
-Autonomous Network Operations Copilot
-
-Features
-
-• AI Log Analysis
-
-• Runbook Search
-
-• Sensor Analytics
-
-• Executive Incident Reports
-
-Version 0.6
+RackMind AI is a multi-agent Network Operations Copilot designed
+to assist infrastructure engineers with incident response,
+documentation search, sensor analytics, and executive reporting.
 """
     )

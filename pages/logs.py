@@ -1,7 +1,7 @@
 import streamlit as st
 
 from tools.log_reader import analyze_log
-from agents.log_agent import analyze_log_summary
+from agents.coordinator import coordinate_log_workflow
 
 
 def show_logs():
@@ -23,7 +23,7 @@ def show_logs():
 
     if st.button("Analyze Log", use_container_width=True):
 
-        with st.spinner("Analyzing infrastructure log..."):
+        with st.spinner("Reading infrastructure log..."):
 
             summary = analyze_log(logfile)
 
@@ -81,6 +81,8 @@ def show_logs():
 
         st.subheader("🤖 Executive Incident Report")
 
-        report = analyze_log_summary(summary)
+        with st.spinner("Coordinator Agent orchestrating AI agents..."):
+
+            report = coordinate_log_workflow(summary)
 
         st.markdown(report)
