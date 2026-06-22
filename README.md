@@ -6,7 +6,7 @@
 
 
 
-RackMind AI is a multi-agent AI system that assists Network Operations Centers by analyzing infrastructure logs, searching runbooks, monitoring sensor data, and generating executive incident reports.
+RackMind AI helps Network Operations teams investigate infrastructure incidents using specialized AI agents.
 
 
 
@@ -14,7 +14,7 @@ RackMind AI is a multi-agent AI system that assists Network Operations Centers b
 
 
 
-\- 📜 AI Log Analysis
+\- 📜 Log Analysis
 
 \- 📄 Runbook Search
 
@@ -23,6 +23,24 @@ RackMind AI is a multi-agent AI system that assists Network Operations Centers b
 \- 🤖 Coordinator Agent
 
 \- 📑 Executive Incident Reports
+
+
+
+\## Stack
+
+
+
+\- Python
+
+\- Streamlit
+
+\- Google Gemini
+
+\- Google ADK
+
+\- Pandas
+
+\- GitHub
 
 
 
@@ -42,15 +60,15 @@ RackMind AI is a multi-agent AI system that assists Network Operations Centers b
 
 &#x20;                  │
 
-&#x20;    ┌─────────────┼─────────────┐
+&#x20;     ┌────────────┼────────────┐
 
-&#x20;    │             │             │
+&#x20;     │            │            │
 
 &#x20;Log Agent   Runbook Agent  Sensor Agent
 
-&#x20;    │             │             │
+&#x20;     │            │            │
 
-&#x20;    └─────────────┼─────────────┘
+&#x20;     └────────────┼────────────┘
 
 &#x20;                  │
 
@@ -60,39 +78,23 @@ RackMind AI is a multi-agent AI system that assists Network Operations Centers b
 
 &#x20;                  ▼
 
-&#x20;      Executive Incident Report
+&#x20;       Executive Incident Report
 
 ```
 
 
 
-\## Technology
+\## Roadmap
 
 
 
-\- Python
-
-\- Streamlit
-
-\- Google Gemini
-
-\- Pandas
-
-\- Git/GitHub
-
-
-
-\## Planned
-
-
-
-\- Google ADK Agent Objects
+\- Google ADK Tool Registry
 
 \- MCP Server
 
-\- ChromaDB Knowledge Base
+\- ChromaDB
 
-\- PDF Incident Export
+\- PDF Export
 
 \- Hugging Face Deployment
 

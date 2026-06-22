@@ -1,7 +1,6 @@
 .venv/
 .env
 __pycache__/
-**/__pycache__/
 *.pyc
-.chromadb/
-.vscode/
+.streamlit/
+*.log
