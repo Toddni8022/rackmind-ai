@@ -15,19 +15,21 @@ def analyze_log_summary(summary):
     prompt = f"""
 You are a Senior Network Operations Engineer.
 
-Analyze this structured log summary.
-
-Log Summary
+Analyze the following infrastructure log summary.
 
 {summary}
 
-Provide:
+Return your answer in this format:
 
 # Executive Summary
 
-# Likely Root Cause
+# Root Cause
 
 # Recommended Actions
+
+- item 1
+- item 2
+- item 3
 
 # Priority
 

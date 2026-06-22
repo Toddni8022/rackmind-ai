@@ -3,56 +3,55 @@ from collections import Counter
 
 def analyze_log(uploaded_file):
     """
-    Reads a log file and returns a structured summary.
+    Reads an uploaded infrastructure log and returns
+    a structured summary for the AI agents.
     """
 
     text = uploaded_file.read().decode("utf-8")
 
     lines = text.splitlines()
 
-    summary = Counter()
+    counts = Counter()
 
-    max_temp = 0
+    max_temperature = 0
 
     for line in lines:
 
         upper = line.upper()
 
         if "WARNING" in upper:
-            summary["warnings"] += 1
+            counts["warnings"] += 1
 
         if "ERROR" in upper:
-            summary["errors"] += 1
+            counts["errors"] += 1
 
         if "CRC" in upper:
-            summary["crc_errors"] += 1
+            counts["crc_errors"] += 1
 
         if "RESET" in upper:
-            summary["interface_resets"] += 1
+            counts["interface_resets"] += 1
 
         if "TEMPERATURE" in upper:
 
-            parts = line.replace("(", " ").replace(")", " ").split()
+            for word in line.replace("(", " ").replace(")", " ").split():
 
-            for part in parts:
-
-                if part.endswith("F"):
+                if word.endswith("F"):
 
                     try:
 
-                        value = int(part.replace("F", ""))
+                        value = int(word.replace("F", ""))
 
-                        max_temp = max(max_temp, value)
+                        if value > max_temperature:
+                            max_temperature = value
 
                     except ValueError:
-
                         pass
 
     return {
         "total_events": len(lines),
-        "warnings": summary["warnings"],
-        "errors": summary["errors"],
-        "crc_errors": summary["crc_errors"],
-        "interface_resets": summary["interface_resets"],
-        "max_temperature": max_temp,
+        "warnings": counts["warnings"],
+        "errors": counts["errors"],
+        "crc_errors": counts["crc_errors"],
+        "interface_resets": counts["interface_resets"],
+        "max_temperature": max_temperature,
     }
