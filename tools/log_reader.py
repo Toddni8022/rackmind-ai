@@ -2,10 +2,6 @@ from collections import Counter
 
 
 def analyze_log(uploaded_file):
-    """
-    Reads an uploaded infrastructure log and returns
-    a structured summary for the AI agents.
-    """
 
     text = uploaded_file.read().decode("utf-8")
 
@@ -14,6 +10,8 @@ def analyze_log(uploaded_file):
     counts = Counter()
 
     max_temperature = 0
+
+    timeline = []
 
     for line in lines:
 
@@ -30,6 +28,14 @@ def analyze_log(uploaded_file):
 
         if "RESET" in upper:
             counts["interface_resets"] += 1
+
+        if (
+            "CRC" in upper
+            or "ERROR" in upper
+            or "TEMPERATURE" in upper
+            or "RESET" in upper
+        ):
+            timeline.append(line)
 
         if "TEMPERATURE" in upper:
 
@@ -54,4 +60,5 @@ def analyze_log(uploaded_file):
         "crc_errors": counts["crc_errors"],
         "interface_resets": counts["interface_resets"],
         "max_temperature": max_temperature,
+        "timeline": timeline,
     }
