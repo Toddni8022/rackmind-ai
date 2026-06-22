@@ -1,8 +1,9 @@
 import streamlit as st
 
-from agents.coordinator import analyze_issue
-from agents.runbook_agent import search_runbook
-from tools.pdf_search import extract_pdf_text
+from pages.dashboard import show_dashboard
+from pages.runbook import show_runbook
+from pages.logs import show_logs
+from pages.sensors import show_sensors
 
 st.set_page_config(
     page_title="RackMind AI",
@@ -13,76 +14,23 @@ st.set_page_config(
 st.title("🖥️ RackMind AI")
 st.caption("Autonomous Data Center Operations Copilot")
 
-with st.sidebar:
-
-    st.header("Infrastructure Files")
-
-    runbook = st.file_uploader(
-        "📄 Upload Runbook (PDF)",
-        type=["pdf"],
-        accept_multiple_files=False
-    )
-
-    logfile = st.file_uploader(
-        "📜 Upload Log",
-        type=["log", "txt"],
-        accept_multiple_files=False
-    )
-
-    sensor = st.file_uploader(
-        "📊 Upload Sensor CSV",
-        type=["csv"],
-        accept_multiple_files=False
-    )
-
-    st.divider()
-
-    st.subheader("Agent Status")
-
-    st.success("🟢 Coordinator Agent Online")
-
-    if runbook:
-        st.success("🟢 Runbook Agent Ready")
-    else:
-        st.info("⚪ Runbook Agent")
-
-    st.info("⚪ Log Agent")
-
-    st.info("⚪ Sensor Agent")
-
-    st.info("⚪ Report Agent")
-
-st.header("Ask RackMind")
-
-question = st.text_area(
-    "Describe the infrastructure issue",
-    placeholder="Example: Rack 22 is overheating and showing CRC errors..."
+tab1, tab2, tab3, tab4 = st.tabs(
+    [
+        "🏠 Dashboard",
+        "📄 Runbook",
+        "📜 Log Agent",
+        "📊 Sensor Agent",
+    ]
 )
 
-if st.button("Analyze"):
+with tab1:
+    show_dashboard()
 
-    if question.strip() == "":
-        st.warning("Please enter an infrastructure issue.")
+with tab2:
+    show_runbook()
 
-    else:
+with tab3:
+    show_logs()
 
-        if runbook:
-
-            with st.spinner("Runbook Agent Reading Documentation..."):
-
-                runbook_text = extract_pdf_text(runbook)
-
-                answer = search_runbook(
-                    question,
-                    runbook_text
-                )
-
-        else:
-
-            with st.spinner("Coordinator Agent Thinking..."):
-
-                answer = analyze_issue(question)
-
-        st.markdown("---")
-
-        st.markdown(answer)
+with tab4:
+    show_sensors()
