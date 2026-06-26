@@ -12,6 +12,30 @@ st.set_page_config(
     layout="wide",
 )
 
+st.markdown(
+    """
+    <style>
+    .block-container {
+        padding-top: 1.4rem;
+        padding-bottom: 2rem;
+    }
+    [data-testid="stMetric"] {
+        background: rgba(49, 51, 63, 0.08);
+        border: 1px solid rgba(128, 128, 128, 0.18);
+        border-radius: 8px;
+        padding: 0.85rem 1rem;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 0.82rem;
+    }
+    div[data-testid="stAlert"] {
+        border-radius: 8px;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.title("🖥️ RackMind AI")
 st.caption("Autonomous Data Center Operations Copilot")
 
