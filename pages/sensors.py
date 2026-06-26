@@ -1,7 +1,12 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
 from agents.coordinator import coordinate_sensor_workflow
+from services.assessment_service import (
+    build_recommendations,
+    score_sensor_summary,
+)
+from services.sensor_parser import parse_sensor_data
 
 
 def show_sensors():
@@ -19,10 +24,29 @@ def show_sensors():
         st.info("Upload a sensor CSV to begin analysis.")
         return
 
-    df = pd.read_csv(sensor_file)
+    try:
+        df = pd.read_csv(sensor_file)
+    except Exception as ex:
+        st.error(f"Unable to read CSV: {ex}")
+        return
+
+    df.columns = df.columns.str.strip().str.lower()
+
+    if df.empty:
+        st.warning("The uploaded CSV is empty.")
+        return
+
+    numeric_columns = df.select_dtypes(include="number").columns.tolist()
+
+    if not numeric_columns:
+        st.warning("No numeric telemetry columns were found.")
+        return
+
+    summary = parse_sensor_data(df)
+    scorecard = score_sensor_summary(summary)
+    recommendations = build_recommendations(sensor_summary=summary)
 
     st.subheader("Sensor Data")
-
     st.dataframe(
         df,
         use_container_width=True,
@@ -30,64 +54,44 @@ def show_sensors():
     )
 
     st.divider()
+    st.subheader("Infrastructure Health")
 
-    numeric_columns = df.select_dtypes(include="number").columns
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Score", f"{scorecard['score']}/100")
+    c2.metric("Status", scorecard["status"])
+    c3.metric("Max Temp", f"{summary['max_temp']:.1f}°F")
+    c4.metric("Peak Power", f"{summary['peak_power']:.2f} kW")
 
+    st.progress(scorecard["score"] / 100)
+
+    st.divider()
     st.subheader("Charts")
 
-    for column in numeric_columns:
+    selected_columns = st.multiselect(
+        "Metrics",
+        numeric_columns,
+        default=numeric_columns[: min(3, len(numeric_columns))],
+    )
 
-        st.write(f"### {column.title()}")
-
-        st.line_chart(df[column])
-
-    summary = {}
-
-    for column in numeric_columns:
-
-        summary[column] = {
-            "min": float(df[column].min()),
-            "max": float(df[column].max()),
-            "mean": round(float(df[column].mean()), 2),
-        }
+    for column in selected_columns:
+        st.line_chart(df[column], height=220)
 
     st.divider()
+    st.subheader("Recommended Actions")
 
-    col1, col2, col3 = st.columns(3)
-
-    if "temperature" in df.columns:
-
-        col1.metric(
-            "Maximum Temperature",
-            f"{df['temperature'].max()}°F",
-        )
-
-        col2.metric(
-            "Average Temperature",
-            f"{round(df['temperature'].mean(), 1)}°F",
-        )
-
-    if "power_kw" in df.columns:
-
-        col3.metric(
-            "Peak Power",
-            f"{df['power_kw'].max()} kW",
-        )
+    for item in recommendations:
+        st.markdown(f"- {item}")
 
     st.divider()
-
     st.subheader("🤖 AI Infrastructure Assessment")
 
     with st.spinner("Coordinator Agent analyzing sensor data..."):
-
         report = coordinate_sensor_workflow(summary)
 
     st.markdown(report)
 
     st.divider()
-
     st.subheader("Summary Statistics")
-
     st.dataframe(
         df.describe(),
         use_container_width=True,
