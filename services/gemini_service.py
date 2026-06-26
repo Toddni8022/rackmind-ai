@@ -43,6 +43,12 @@ class AIService:
                 "Add it to your local .env file or Streamlit Cloud secrets."
             )
 
+        if str(GEMINI_API_KEY).startswith("sk-"):
+            raise RuntimeError(
+                "The configured key looks like an OpenAI key, not a Gemini key. "
+                "Use a Google AI Studio key that usually starts with AIza."
+            )
+
         if self._client is None:
             self._client = genai.Client(
                 api_key=GEMINI_API_KEY
@@ -68,7 +74,7 @@ class AIService:
 
 {str(ex)}
 
-The demo dashboard can still run, but Gemini-powered responses require a Google API key.
+The demo dashboard can still run, but Gemini-powered responses require a valid Google API key.
 """
 
         for attempt in range(retries):
@@ -81,6 +87,9 @@ The demo dashboard can still run, but Gemini-powered responses require a Google 
                 )
 
                 info("Gemini request completed successfully.")
+
+                if not response.text:
+                    return "Gemini returned an empty response. Try again."
 
                 return response.text
 
