@@ -13,6 +13,11 @@ from services.assessment_service import (
     score_sensor_summary,
     score_log_summary,
 )
+from services.app_state import (
+    clear_runtime_state,
+    load_runtime_state,
+    records_to_dataframe,
+)
 from services.sensor_parser import parse_sensor_data
 from services.vector_service import collection
 
@@ -26,6 +31,19 @@ def _load_sensor_data():
             st.session_state["rackmind_sensor_df"].copy(),
             st.session_state.get("rackmind_sensor_summary", {}),
             st.session_state.get("rackmind_sensor_source", "uploaded sensor data"),
+            True,
+        )
+
+    runtime_state = load_runtime_state()
+    persisted_df = records_to_dataframe(runtime_state.get("sensor_records"))
+
+    if persisted_df is not None:
+        persisted_df.columns = persisted_df.columns.str.strip().str.lower()
+
+        return (
+            persisted_df,
+            runtime_state.get("sensor_summary", {}),
+            runtime_state.get("sensor_source", "latest saved sensor data"),
             True,
         )
 
@@ -70,6 +88,7 @@ def show_dashboard():
     st.header("🏠 RackMind Operations Center")
     st.caption(f"{APP_NAME} | Version {APP_VERSION}")
 
+    runtime_state = load_runtime_state()
     df, sensor_summary, sensor_source, is_live_sensor = _load_sensor_data()
 
     if df is None:
@@ -78,7 +97,10 @@ def show_dashboard():
 
     sensor_summary = normalize_sensor_summary(sensor_summary)
     df, x_axis = _prepare_chart_data(df)
-    log_summary = st.session_state.get("rackmind_log_summary")
+    log_summary = st.session_state.get(
+        "rackmind_log_summary",
+        runtime_state.get("log_summary"),
+    )
     log = normalize_log_summary(log_summary)
     sensor_scorecard = score_sensor_summary(sensor_summary)
     log_scorecard = score_log_summary(log_summary) if log_summary else None
@@ -141,10 +163,29 @@ def show_dashboard():
         if log_summary:
             st.success(
                 "Log data: "
-                + st.session_state.get("rackmind_log_source", "latest analysis")
+                + st.session_state.get(
+                    "rackmind_log_source",
+                    runtime_state.get("log_source", "latest analysis"),
+                )
             )
         else:
             st.info("Log data: no log analyzed yet")
+
+        if runtime_state.get("updated_at"):
+            st.caption(f"Last analysis: {runtime_state['updated_at']}")
+
+        if st.button("Reset to sample data", width="stretch"):
+            for key in (
+                "rackmind_log_summary",
+                "rackmind_log_source",
+                "rackmind_sensor_df",
+                "rackmind_sensor_summary",
+                "rackmind_sensor_source",
+            ):
+                st.session_state.pop(key, None)
+
+            clear_runtime_state()
+            st.rerun()
 
         st.subheader("Readiness")
         st.metric("Indexed Runbooks", runbooks)
