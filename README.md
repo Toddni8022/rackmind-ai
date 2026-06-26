@@ -84,18 +84,28 @@ RackMind Coordinator Agent
 
 ```text
 rackmind-ai/
+  rackmind.py              # Main Streamlit entry point
+
   adk/
     root_agent.py          # Google ADK coordinator agent
     tools.py               # ADK tool wrappers
     incident_tool.py       # Complete incident investigation workflow
-    adk_service.py         # ADK runner service for the app
-    test_adk.py            # ADK test runner
+    chat.py                # ADK chat service for the app
+    test_runner.py         # ADK test runner
 
   agents/
     log_agent.py           # Log analysis agent
     sensor_agent.py        # Sensor analysis agent
     runbook_agent.py       # Runbook Q&A agent
     report_agent.py        # Incident report generation
+
+  pages/
+    dashboard.py           # Dashboard tab
+    runbook.py             # Runbook search tab
+    logs.py                # Log agent tab
+    sensors.py             # Sensor agent tab
+    incident.py            # Incident Commander tab
+    topology.py            # Topology view
 
   services/
     gemini_service.py      # Gemini API service
@@ -194,10 +204,26 @@ GOOGLE_API_KEY=your_api_key_here
 Run the Streamlit app:
 
 ```bash
-streamlit run main.py
+streamlit run rackmind.py
 ```
 
-If your local entry file has a different name, run Streamlit against that file instead.
+---
+
+## Streamlit Cloud Deployment
+
+For Streamlit Community Cloud, use:
+
+```text
+Repository: Toddni8022/rackmind-ai
+Branch: main
+Main file path: rackmind.py
+```
+
+If using Gemini features, add your API key in Streamlit Cloud secrets:
+
+```toml
+GOOGLE_API_KEY = "your_api_key_here"
+```
 
 ---
 
@@ -206,7 +232,7 @@ If your local entry file has a different name, run Streamlit against that file i
 To test the Google ADK agent flow directly:
 
 ```bash
-python adk/test_adk.py
+python adk/test_runner.py
 ```
 
 The test runner sends a sample question about CRC errors to the RackMind coordinator agent.
