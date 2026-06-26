@@ -30,6 +30,9 @@ def show_logs():
         with st.spinner("Reading infrastructure log..."):
             summary = analyze_log(logfile)
 
+        st.session_state["rackmind_log_summary"] = summary
+        st.session_state["rackmind_log_source"] = logfile.name
+
         scorecard = score_log_summary(summary)
         recommendations = build_recommendations(log_summary=summary)
 

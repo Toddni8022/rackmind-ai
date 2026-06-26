@@ -43,6 +43,10 @@ def show_sensors():
         return
 
     summary = parse_sensor_data(df)
+    st.session_state["rackmind_sensor_df"] = df
+    st.session_state["rackmind_sensor_summary"] = summary
+    st.session_state["rackmind_sensor_source"] = sensor_file.name
+
     scorecard = score_sensor_summary(summary)
     recommendations = build_recommendations(sensor_summary=summary)
 

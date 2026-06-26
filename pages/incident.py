@@ -59,6 +59,12 @@ def show_incident():
 
         log_summary = parse_log(log_text)
         sensor_summary = parse_sensor_data(sensor_df)
+        st.session_state["rackmind_log_summary"] = log_summary
+        st.session_state["rackmind_log_source"] = log_file.name
+        st.session_state["rackmind_sensor_df"] = sensor_df
+        st.session_state["rackmind_sensor_summary"] = sensor_summary
+        st.session_state["rackmind_sensor_source"] = sensor_file.name
+
         log_score = score_log_summary(log_summary)
         sensor_score = score_sensor_summary(sensor_summary)
         alerts = build_alerts(
