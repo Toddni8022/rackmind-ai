@@ -47,7 +47,8 @@ GEMINI_MODEL = _get_secret(
     "gemini-2.5-flash",
 )
 
-GEMINI_API_KEY = _get_secret("GOOGLE_API_KEY")
+# Prefer the Google AI Studio key name but support GEMINI_API_KEY locally too.
+GEMINI_API_KEY = _get_secret("GOOGLE_API_KEY") or _get_secret("GEMINI_API_KEY")
 
 # --------------------------------------------------
 # Google ADK
