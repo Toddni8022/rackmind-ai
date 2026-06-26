@@ -1,39 +1,36 @@
 # RackMind AI
 
-## Autonomous Data Center Operations Copilot
+## Data Center Operations Copilot
 
-RackMind AI is an AI-powered operations assistant for modern data centers. It combines Google ADK, Gemini, Retrieval-Augmented Generation (RAG), infrastructure logs, sensor telemetry, and operational runbooks to help investigate incidents and produce clear executive-level reports.
+RackMind AI is a Streamlit-based AI operations assistant for data center incident review. It analyzes switch logs, rack sensor telemetry, and runbook guidance, then uses Google Gemini to produce a clear executive-style incident report.
 
-The project is built as a portfolio-ready AI agent demo focused on real data center problems: CRC errors, switch resets, heat events, environmental telemetry, runbook lookup, and incident response.
+This project is built around a real infrastructure workflow: CRC errors, interface resets, temperature events, rack power draw, runbook lookup, and escalation recommendations.
 
 ---
 
 ## What It Does
 
-RackMind AI helps a data center operator answer questions like:
+RackMind AI helps an operator answer questions like:
 
-- Why are CRC errors increasing on this switch?
+- Why are CRC errors increasing?
 - Is the rack overheating?
-- Do the logs and sensor readings point to the same issue?
-- What runbook steps apply to this incident?
+- Are the logs and sensors pointing to the same problem?
+- What runbook steps apply?
 - What should be escalated first?
-- How would this look in an executive incident report?
+- How would this incident look in an executive report?
 
 ---
 
 ## Key Features
 
-- Multi-agent architecture using Google ADK
-- Gemini-powered incident analysis
-- Coordinator agent for routing operational questions
-- Log agent for switch and infrastructure events
+- Multi-page Streamlit dashboard
+- Google Gemini incident report generation
+- Coordinator agent that routes work to specialized agents
+- Log agent for switch warnings, errors, CRC events, resets, and temperatures
 - Sensor agent for temperature, humidity, and power telemetry
-- Runbook agent using RAG-style retrieval
-- Single-prompt incident investigation workflow
-- Executive incident report generation
-- Streamlit dashboard interface
-- Dark themed UI configuration
-- Structured parsers for logs and sensor CSV data
+- Runbook search workflow
+- Defensive parsing so missing CSV fields do not crash the app
+- Clear fallback messages when Gemini is not configured
 
 ---
 
@@ -49,8 +46,8 @@ Streamlit Dashboard
 RackMind Coordinator Agent
       |
       +--> Log Agent
-      |       - Parses infrastructure logs
-      |       - Detects warnings, errors, CRC events, and resets
+      |       - Parses switch and infrastructure logs
+      |       - Detects warnings, errors, CRC events, resets, and heat events
       |
       +--> Sensor Agent
       |       - Reviews rack temperature, humidity, and power data
@@ -60,9 +57,9 @@ RackMind Coordinator Agent
       |       - Searches operational documentation
       |       - Returns relevant response steps
       |
-      +--> Incident Investigation Tool
+      +--> Report Agent
               - Combines logs, sensors, and runbooks
-              - Generates an executive report
+              - Uses Gemini to generate an executive report
 ```
 
 ---
@@ -71,10 +68,9 @@ RackMind Coordinator Agent
 
 - Python
 - Streamlit
+- Pandas
 - Google Gemini
 - Google ADK
-- Pandas
-- ChromaDB / vector search concepts
 - RAG-style runbook retrieval
 - GitHub
 
@@ -86,79 +82,32 @@ RackMind Coordinator Agent
 rackmind-ai/
   rackmind.py              # Main Streamlit entry point
 
-  adk/
-    root_agent.py          # Google ADK coordinator agent
-    tools.py               # ADK tool wrappers
-    incident_tool.py       # Complete incident investigation workflow
-    chat.py                # ADK chat service for the app
-    test_runner.py         # ADK test runner
-
   agents/
+    coordinator.py         # Routes work between agents
     log_agent.py           # Log analysis agent
     sensor_agent.py        # Sensor analysis agent
     runbook_agent.py       # Runbook Q&A agent
-    report_agent.py        # Incident report generation
+    report_agent.py        # Gemini incident report agent
 
   pages/
     dashboard.py           # Dashboard tab
+    logs.py                # Log analysis tab
+    sensors.py             # Sensor analytics tab
     runbook.py             # Runbook search tab
-    logs.py                # Log agent tab
-    sensors.py             # Sensor agent tab
-    incident.py            # Incident Commander tab
+    incident.py            # Incident commander tab
     topology.py            # Topology view
 
   services/
-    gemini_service.py      # Gemini API service
-    log_parser.py          # Infrastructure log parser
+    gemini_service.py      # Central Gemini service
+    log_parser.py          # Log parser
     sensor_parser.py       # Sensor CSV parser
     vector_service.py      # Runbook search service
     incident_service.py    # Incident coordination service
     logger.py              # App logging
 
-  data/
-    sample logs, sensor data, and runbook material
-
-  .streamlit/
-    config.toml            # Dark theme UI settings
+  data/                    # Sample logs, sensors, and runbooks
+  .streamlit/              # Streamlit settings
 ```
-
----
-
-## Current Release
-
-### RackMind AI v1.0.0
-
-Completed:
-
-- Multi-page Streamlit UI
-- Coordinator agent
-- Log agent
-- Runbook agent
-- Sensor analytics
-- Executive report agent
-- Google ADK root agent
-- ADK tools
-- Single-prompt incident investigation workflow
-- Dark Streamlit theme
-- Cleaner project structure
-- Updated `.gitignore`
-
----
-
-## Example Incident Workflow
-
-1. Upload or load infrastructure log data.
-2. Upload or load rack sensor CSV data.
-3. RackMind parses the logs and telemetry.
-4. The runbook agent retrieves relevant operational guidance.
-5. The incident tool combines everything into one investigation.
-6. Gemini generates an executive incident report with:
-   - Executive summary
-   - Root cause
-   - Business impact
-   - Recommended actions
-   - Priority
-   - Confidence level
 
 ---
 
@@ -195,13 +144,14 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Create a `.env` file if your local setup requires API keys:
+Create a local `.env` file:
 
 ```text
-GOOGLE_API_KEY=your_api_key_here
+GOOGLE_API_KEY=your_google_ai_studio_key_here
+GEMINI_MODEL=gemini-2.5-flash
 ```
 
-Run the Streamlit app:
+Run the app:
 
 ```bash
 streamlit run rackmind.py
@@ -219,29 +169,49 @@ Branch: main
 Main file path: rackmind.py
 ```
 
-If using Gemini features, add your API key in Streamlit Cloud secrets:
+Add these secrets in Streamlit Cloud:
 
 ```toml
-GOOGLE_API_KEY = "your_api_key_here"
+GOOGLE_API_KEY = "your_google_ai_studio_key_here"
+GEMINI_MODEL = "gemini-2.5-flash"
 ```
+
+A valid Gemini key usually starts with `AIza`. If the key starts with `sk-`, it is likely an OpenAI key and will not work with this Gemini app.
 
 ---
 
-## ADK Test Runner
+## Sensor CSV Format
 
-To test the Google ADK agent flow directly:
+The sensor page works best with columns like:
 
-```bash
-python adk/test_runner.py
+```csv
+timestamp,rack,temperature,humidity,power_kw
+2026-06-26 08:00,Rack-22,78,45,3.9
+2026-06-26 08:05,Rack-22,84,47,4.2
+2026-06-26 08:10,Rack-22,91,49,4.8
 ```
 
-The test runner sends a sample question about CRC errors to the RackMind coordinator agent.
+The parser also accepts common variations such as `temp`, `temp_f`, `rack_temperature`, `relative_humidity`, `power`, and `load_kw`.
+
+---
+
+## Example Incident Workflow
+
+1. Upload switch log data.
+2. Upload rack sensor CSV data.
+3. RackMind parses logs and telemetry.
+4. The runbook workflow retrieves relevant guidance.
+5. Gemini generates an executive incident report with:
+   - Executive summary
+   - Root cause
+   - Business impact
+   - Recommended actions
+   - Priority
+   - Confidence level
 
 ---
 
 ## Roadmap
-
-Planned improvements:
 
 - PDF incident export
 - Historical incident search
@@ -249,27 +219,12 @@ Planned improvements:
 - Live infrastructure dashboard
 - Multi-rack monitoring
 - Trend analytics
-- Hugging Face or cloud deployment
 - Demo video
 - Architecture diagram
 - Kaggle capstone polish
 
 ---
 
-## Why This Project Matters
-
-Data centers generate a lot of operational noise: logs, sensor readings, alerts, runbooks, and escalation notes. RackMind AI demonstrates how an AI operations copilot can reduce that noise into a clear investigation path.
-
-Instead of only showing a chatbot, this project shows a practical AI workflow tied to real infrastructure work:
-
-- Detect the issue
-- Pull supporting evidence
-- Compare telemetry against logs
-- Search operational guidance
-- Generate an actionable report
-
----
-
 ## Status
 
-RackMind AI is an active portfolio project and AI agent capstone demo.
+RackMind AI is an active AI agent capstone and portfolio project focused on practical data center operations.
