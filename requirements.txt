@@ -4,6 +4,5 @@ plotly
 python-dotenv
 google-genai
 google-adk
-chromadb
 pypdf
 graphviz
