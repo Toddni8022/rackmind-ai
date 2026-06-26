@@ -110,6 +110,7 @@ def show_dashboard():
         y="temperature",
         title="Temperature Trend",
         markers=True,
+        color_discrete_sequence=["#22d3ee"],
     )
 
     fig_temp.add_hline(
@@ -126,6 +127,9 @@ def show_dashboard():
     )
     fig_temp.update_layout(
         template="plotly_dark",
+        paper_bgcolor="rgba(15, 23, 42, 0)",
+        plot_bgcolor="rgba(15, 23, 42, 0.38)",
+        font_color="#e0f2fe",
         height=360,
         xaxis_title="Time",
         yaxis_title="Temperature (°F)",
@@ -146,9 +150,13 @@ def show_dashboard():
             y="humidity",
             title="Humidity Trend",
             markers=True,
+            color_discrete_sequence=["#10b981"],
         )
         fig_humidity.update_layout(
             template="plotly_dark",
+            paper_bgcolor="rgba(15, 23, 42, 0)",
+            plot_bgcolor="rgba(15, 23, 42, 0.38)",
+            font_color="#e0f2fe",
             height=320,
             xaxis_title="Time",
             yaxis_title="Humidity (%)",
@@ -165,6 +173,7 @@ def show_dashboard():
             x="timestamp",
             y="power_kw",
             title="Power Consumption",
+            color_discrete_sequence=["#ec4899"],
         )
         fig_power.add_hline(
             y=4.5,
@@ -174,6 +183,9 @@ def show_dashboard():
         )
         fig_power.update_layout(
             template="plotly_dark",
+            paper_bgcolor="rgba(15, 23, 42, 0)",
+            plot_bgcolor="rgba(15, 23, 42, 0.38)",
+            font_color="#e0f2fe",
             height=320,
             xaxis_title="Time",
             yaxis_title="Power (kW)",
