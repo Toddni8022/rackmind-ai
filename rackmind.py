@@ -81,11 +81,21 @@ st.markdown(
         color: #ffffff;
         text-shadow: 0 0 22px rgba(34, 211, 238, 0.20);
     }
-    [data-testid="stTabs"] button {
+    [data-testid="stTabs"] button,
+    [data-testid="stSegmentedControl"] label {
         color: #e0f2fe;
     }
     [data-testid="stTabs"] button[aria-selected="true"] {
         color: #22d3ee;
+    }
+    [data-testid="stSegmentedControl"] label[data-baseweb="radio"] {
+        background: rgba(15, 23, 42, 0.76);
+        border: 1px solid rgba(148, 163, 184, 0.22);
+        border-radius: 8px;
+    }
+    [data-testid="stSegmentedControl"] label[data-baseweb="radio"]:has(input:checked) {
+        background: linear-gradient(90deg, rgba(34, 211, 238, 0.22), rgba(236, 72, 153, 0.18));
+        border-color: rgba(34, 211, 238, 0.55);
     }
     [data-testid="stTabs"] [data-baseweb="tab-highlight"] {
         background: linear-gradient(90deg, var(--rackmind-cyan), var(--rackmind-pink), var(--rackmind-amber));
@@ -113,27 +123,30 @@ st.markdown(
 st.title("🖥️ RackMind AI")
 st.caption("Autonomous Data Center Operations Copilot")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(
-    [
-        "🏠 Dashboard",
-        "📄 Runbook",
-        "📜 Log Agent",
-        "📊 Sensor Agent",
-        "🚨 Incident Commander",
-    ]
+pages = {
+    "🏠 Dashboard": show_dashboard,
+    "📄 Runbook": show_runbook,
+    "📜 Log Agent": show_logs,
+    "📊 Sensor Agent": show_sensors,
+    "🚨 Incident Commander": show_incident,
+}
+
+selected_page = st.segmented_control(
+    "RackMind section",
+    options=list(pages),
+    default="🏠 Dashboard",
+    label_visibility="collapsed",
 )
 
-with tab1:
+st.divider()
+
+if selected_page == "🏠 Dashboard":
     show_dashboard()
-
-with tab2:
+elif selected_page == "📄 Runbook":
     show_runbook()
-
-with tab3:
+elif selected_page == "📜 Log Agent":
     show_logs()
-
-with tab4:
+elif selected_page == "📊 Sensor Agent":
     show_sensors()
-
-with tab5:
+elif selected_page == "🚨 Incident Commander":
     show_incident()
