@@ -2,7 +2,7 @@
 
 ## Data Center Operations Copilot
 
-RackMind AI is a Streamlit-based AI operations assistant for data center incident review. It analyzes switch logs, rack sensor telemetry, and runbook guidance, then uses Google Gemini to produce a clear executive-style incident report.
+RackMind AI is a Streamlit-based AI operations assistant for data center incident review. It analyzes switch logs, rack sensor telemetry, and runbook guidance, then uses either Google Gemini or OpenAI to produce a clear executive-style incident report.
 
 This project is built around a real infrastructure workflow: CRC errors, interface resets, temperature events, rack power draw, runbook lookup, and escalation recommendations.
 
@@ -24,13 +24,14 @@ RackMind AI helps an operator answer questions like:
 ## Key Features
 
 - Multi-page Streamlit dashboard
-- Google Gemini incident report generation
+- Gemini or OpenAI incident report generation
+- Provider selection with `AI_PROVIDER=auto`, `gemini`, or `openai`
 - Coordinator agent that routes work to specialized agents
 - Log agent for switch warnings, errors, CRC events, resets, and temperatures
 - Sensor agent for temperature, humidity, and power telemetry
 - Runbook search workflow
 - Defensive parsing so missing CSV fields do not crash the app
-- Clear fallback messages when Gemini is not configured
+- Clear fallback messages when API keys are missing or mismatched
 
 ---
 
@@ -59,7 +60,7 @@ RackMind Coordinator Agent
       |
       +--> Report Agent
               - Combines logs, sensors, and runbooks
-              - Uses Gemini to generate an executive report
+              - Uses Gemini or OpenAI to generate an executive report
 ```
 
 ---
@@ -70,6 +71,7 @@ RackMind Coordinator Agent
 - Streamlit
 - Pandas
 - Google Gemini
+- OpenAI
 - Google ADK
 - RAG-style runbook retrieval
 - GitHub
@@ -87,7 +89,7 @@ rackmind-ai/
     log_agent.py           # Log analysis agent
     sensor_agent.py        # Sensor analysis agent
     runbook_agent.py       # Runbook Q&A agent
-    report_agent.py        # Gemini incident report agent
+    report_agent.py        # Incident report agent
 
   pages/
     dashboard.py           # Dashboard tab
@@ -98,7 +100,7 @@ rackmind-ai/
     topology.py            # Topology view
 
   services/
-    gemini_service.py      # Central Gemini service
+    gemini_service.py      # Central AI provider service
     log_parser.py          # Log parser
     sensor_parser.py       # Sensor CSV parser
     vector_service.py      # Runbook search service
@@ -144,11 +146,30 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Create a local `.env` file:
+Create a local `.env` file.
+
+For automatic provider selection:
 
 ```text
+AI_PROVIDER=auto
+OPENAI_API_KEY=your_openai_key_here
+OPENAI_MODEL=gpt-5.5
+```
+
+For Gemini only:
+
+```text
+AI_PROVIDER=gemini
 GOOGLE_API_KEY=your_google_ai_studio_key_here
 GEMINI_MODEL=gemini-2.5-flash
+```
+
+For OpenAI only:
+
+```text
+AI_PROVIDER=openai
+OPENAI_API_KEY=your_openai_key_here
+OPENAI_MODEL=gpt-5.5
 ```
 
 Run the app:
@@ -169,14 +190,37 @@ Branch: main
 Main file path: rackmind.py
 ```
 
-Add these secrets in Streamlit Cloud:
+Add one of these secret blocks in Streamlit Cloud.
+
+OpenAI:
 
 ```toml
+AI_PROVIDER = "openai"
+OPENAI_API_KEY = "your_openai_key_here"
+OPENAI_MODEL = "gpt-5.5"
+```
+
+Gemini:
+
+```toml
+AI_PROVIDER = "gemini"
 GOOGLE_API_KEY = "your_google_ai_studio_key_here"
 GEMINI_MODEL = "gemini-2.5-flash"
 ```
 
-A valid Gemini key usually starts with `AIza`. If the key starts with `sk-`, it is likely an OpenAI key and will not work with this Gemini app.
+Auto mode:
+
+```toml
+AI_PROVIDER = "auto"
+OPENAI_API_KEY = "your_openai_key_here"
+GOOGLE_API_KEY = "your_google_ai_studio_key_here"
+OPENAI_MODEL = "gpt-5.5"
+GEMINI_MODEL = "gemini-2.5-flash"
+```
+
+In auto mode, RackMind uses OpenAI when `OPENAI_API_KEY` is present. If no OpenAI key is present, it falls back to Gemini when a Google key is present.
+
+A valid Gemini key usually starts with `AIza`. A valid OpenAI key usually starts with `sk-`.
 
 ---
 
@@ -201,7 +245,7 @@ The parser also accepts common variations such as `temp`, `temp_f`, `rack_temper
 2. Upload rack sensor CSV data.
 3. RackMind parses logs and telemetry.
 4. The runbook workflow retrieves relevant guidance.
-5. Gemini generates an executive incident report with:
+5. Gemini or OpenAI generates an executive incident report with:
    - Executive summary
    - Root cause
    - Business impact
