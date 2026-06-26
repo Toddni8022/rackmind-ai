@@ -6,3 +6,4 @@ google-genai
 google-adk
 pypdf
 graphviz
+reportlab
