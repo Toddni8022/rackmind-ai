@@ -2,6 +2,15 @@ import streamlit as st
 import pandas as pd
 
 from agents.coordinator import coordinate_sensor_workflow
+from services.sensor_parser import normalize_sensor_dataframe, parse_sensor_data
+
+
+def _metric_value(value, suffix=""):
+
+    if value is None:
+        return "N/A"
+
+    return f"{value}{suffix}"
 
 
 def show_sensors():
@@ -19,7 +28,17 @@ def show_sensors():
         st.info("Upload a sensor CSV to begin analysis.")
         return
 
-    df = pd.read_csv(sensor_file)
+    try:
+        df = pd.read_csv(sensor_file)
+    except Exception as ex:
+        st.error(f"Unable to read sensor CSV: {ex}")
+        return
+
+    if df.empty:
+        st.warning("The uploaded CSV does not contain any rows.")
+        return
+
+    df = normalize_sensor_dataframe(df)
 
     st.subheader("Sensor Data")
 
@@ -31,48 +50,40 @@ def show_sensors():
 
     st.divider()
 
-    numeric_columns = df.select_dtypes(include="number").columns
+    numeric_columns = df.select_dtypes(include="number").columns.tolist()
+
+    if not numeric_columns:
+        st.warning("No numeric sensor columns were found in this CSV.")
+        return
 
     st.subheader("Charts")
 
     for column in numeric_columns:
 
-        st.write(f"### {column.title()}")
+        st.write(f"### {column.replace('_', ' ').title()}")
 
         st.line_chart(df[column])
 
-    summary = {}
-
-    for column in numeric_columns:
-
-        summary[column] = {
-            "min": float(df[column].min()),
-            "max": float(df[column].max()),
-            "mean": round(float(df[column].mean()), 2),
-        }
+    summary = parse_sensor_data(df)
 
     st.divider()
 
     col1, col2, col3 = st.columns(3)
 
-    if "temperature" in df.columns:
+    col1.metric(
+        "Maximum Temperature",
+        _metric_value(summary.get("max_temp"), "°F"),
+    )
 
-        col1.metric(
-            "Maximum Temperature",
-            f"{df['temperature'].max()}°F",
-        )
+    col2.metric(
+        "Average Temperature",
+        _metric_value(summary.get("avg_temp"), "°F"),
+    )
 
-        col2.metric(
-            "Average Temperature",
-            f"{round(df['temperature'].mean(), 1)}°F",
-        )
-
-    if "power_kw" in df.columns:
-
-        col3.metric(
-            "Peak Power",
-            f"{df['power_kw'].max()} kW",
-        )
+    col3.metric(
+        "Peak Power",
+        _metric_value(summary.get("peak_power"), " kW"),
+    )
 
     st.divider()
 
@@ -89,6 +100,6 @@ def show_sensors():
     st.subheader("Summary Statistics")
 
     st.dataframe(
-        df.describe(),
+        df[numeric_columns].describe(),
         use_container_width=True,
     )
