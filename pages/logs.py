@@ -25,7 +25,7 @@ def show_logs():
 
     st.success(f"Loaded: {logfile.name}")
 
-    if st.button("Analyze Log", type="primary", use_container_width=True):
+    if st.button("Analyze Log", type="primary", width="stretch"):
 
         with st.spinner("Reading infrastructure log..."):
             summary = analyze_log(logfile)

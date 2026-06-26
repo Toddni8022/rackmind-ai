@@ -42,6 +42,7 @@ def show_dashboard():
 
     df["timestamp"] = pd.to_datetime(
         df["timestamp"],
+        format="mixed",
         errors="coerce",
     )
     df = df.dropna(subset=["timestamp"])
@@ -132,7 +133,7 @@ def show_dashboard():
 
     st.plotly_chart(
         fig_temp,
-        use_container_width=True,
+        width="stretch",
         config={"displaylogo": False},
     )
 
@@ -154,7 +155,7 @@ def show_dashboard():
         )
         st.plotly_chart(
             fig_humidity,
-            use_container_width=True,
+            width="stretch",
             config={"displaylogo": False},
         )
 
@@ -179,7 +180,7 @@ def show_dashboard():
         )
         st.plotly_chart(
             fig_power,
-            use_container_width=True,
+            width="stretch",
             config={"displaylogo": False},
         )
 

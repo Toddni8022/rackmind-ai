@@ -49,7 +49,7 @@ def show_sensors():
     st.subheader("Sensor Data")
     st.dataframe(
         df,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -94,5 +94,5 @@ def show_sensors():
     st.subheader("Summary Statistics")
     st.dataframe(
         df.describe(),
-        use_container_width=True,
+        width="stretch",
     )

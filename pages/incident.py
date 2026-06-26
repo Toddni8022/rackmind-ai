@@ -33,7 +33,7 @@ def show_incident():
     if st.button(
         "Analyze Incident",
         type="primary",
-        use_container_width=True,
+        width="stretch",
     ):
 
         if log_file is None:
@@ -107,7 +107,7 @@ def show_incident():
                 data=pdf,
                 file_name=filename,
                 mime="application/pdf",
-                use_container_width=True,
+                width="stretch",
             )
 
     st.divider()
