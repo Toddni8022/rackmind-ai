@@ -40,6 +40,8 @@ class IncidentService:
             log_report=log_report,
             runbook_report=runbook_context,
             sensor_report=sensor_report,
+            log_summary=log_summary,
+            sensor_summary=sensor_summary,
         )
 
         return report
