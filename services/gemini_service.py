@@ -4,6 +4,8 @@ RackMind AI
 Central AI Service
 """
 
+import time
+
 from google import genai
 from google.genai.errors import ServerError
 from dotenv import load_dotenv
@@ -19,13 +21,7 @@ from services.logger import (
     error,
 )
 
-import time
-
 load_dotenv()
-
-client = genai.Client(
-    api_key=GEMINI_API_KEY
-)
 
 
 class AIService:
@@ -37,6 +33,22 @@ class AIService:
     def __init__(self):
 
         self.model = GEMINI_MODEL
+        self._client = None
+
+    def _get_client(self):
+
+        if not GEMINI_API_KEY:
+            raise RuntimeError(
+                "GOOGLE_API_KEY is not configured. "
+                "Add it to your local .env file or Streamlit Cloud secrets."
+            )
+
+        if self._client is None:
+            self._client = genai.Client(
+                api_key=GEMINI_API_KEY
+            )
+
+        return self._client
 
     def generate(
         self,
@@ -45,6 +57,19 @@ class AIService:
     ) -> str:
 
         info(f"Gemini request using {self.model}")
+
+        try:
+            client = self._get_client()
+        except Exception as ex:
+            warning(str(ex))
+
+            return f"""
+# AI Service Not Configured
+
+{str(ex)}
+
+The demo dashboard can still run, but Gemini-powered responses require a Google API key.
+"""
 
         for attempt in range(retries):
 
