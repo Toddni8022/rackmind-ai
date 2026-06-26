@@ -10,8 +10,7 @@ from services.assessment_service import (
     build_recommendations,
     normalize_log_summary,
     normalize_sensor_summary,
-    score_sensor_summary,
-    score_log_summary,
+    score_operations,
 )
 from services.app_state import (
     clear_runtime_state,
@@ -102,12 +101,7 @@ def show_dashboard():
         runtime_state.get("log_summary"),
     )
     log = normalize_log_summary(log_summary)
-    sensor_scorecard = score_sensor_summary(sensor_summary)
-    log_scorecard = score_log_summary(log_summary) if log_summary else None
-    scorecard = sensor_scorecard
-
-    if log_scorecard and log_scorecard["score"] < sensor_scorecard["score"]:
-        scorecard = log_scorecard
+    scorecard = score_operations(log_summary, sensor_summary)
 
     runbooks = collection.count()
     alerts = build_alerts(

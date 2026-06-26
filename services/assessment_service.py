@@ -75,6 +75,32 @@ def score_sensor_summary(summary: dict | None) -> dict:
     return build_scorecard(score)
 
 
+def score_operations(log_summary=None, sensor_summary=None) -> dict:
+    log_score = score_log_summary(log_summary)
+    sensor_score = score_sensor_summary(sensor_summary)
+
+    if log_summary and sensor_summary:
+        score = round(
+            (log_score["score"] * 0.55)
+            + (sensor_score["score"] * 0.45)
+        )
+    elif log_summary:
+        score = log_score["score"]
+    else:
+        score = sensor_score["score"]
+
+    scorecard = build_scorecard(score)
+
+    if (
+        log_score["severity"] == "Critical"
+        or sensor_score["severity"] == "Critical"
+    ):
+        scorecard["status"] = "Critical"
+        scorecard["severity"] = "Critical"
+
+    return scorecard
+
+
 def build_scorecard(score: float) -> dict:
     score = max(0, min(100, round(score)))
 
@@ -146,9 +172,7 @@ def build_executive_report(
 ) -> str:
     log = normalize_log_summary(log_summary)
     sensor = normalize_sensor_summary(sensor_summary)
-    log_score = score_log_summary(log)
-    sensor_score = score_sensor_summary(sensor)
-    overall = build_scorecard(min(log_score["score"], sensor_score["score"]))
+    overall = score_operations(log, sensor)
     alerts = build_alerts(log, sensor)
     recommendations = build_recommendations(log, sensor)
 
