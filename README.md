@@ -1,100 +1,25 @@
-\# 🖥️ RackMind AI
+# RackMind AI
 
+## Autonomous Data Center Operations Copilot
 
+RackMind AI is an enterprise AI operations assistant for modern data centers.
 
-\## Autonomous Network Operations Copilot
+It combines Google ADK, Gemini, Retrieval-Augmented Generation (RAG), and infrastructure telemetry to investigate incidents, analyze logs, search operational runbooks, and produce executive reports.
 
+---
 
+## Features
 
-RackMind AI helps Network Operations teams investigate infrastructure incidents using specialized AI agents.
+- Multi-Agent AI using Google ADK
+- Runbook Search (ChromaDB RAG)
+- Infrastructure Log Analysis
+- Environmental Sensor Analytics
+- AI Incident Commander
+- Executive Infrastructure Reports
+- Streamlit Dashboard
+- Centralized AI Service
+- Structured Log & Sensor Parsers
 
+---
 
-
-\## Features
-
-
-
-\- 📜 Log Analysis
-
-\- 📄 Runbook Search
-
-\- 📊 Sensor Analytics
-
-\- 🤖 Coordinator Agent
-
-\- 📑 Executive Incident Reports
-
-
-
-\## Stack
-
-
-
-\- Python
-
-\- Streamlit
-
-\- Google Gemini
-
-\- Google ADK
-
-\- Pandas
-
-\- GitHub
-
-
-
-\## Architecture
-
-
-
-```
-
-&#x20;                User
-
-&#x20;                  │
-
-&#x20;                  ▼
-
-&#x20;         Coordinator Agent
-
-&#x20;                  │
-
-&#x20;     ┌────────────┼────────────┐
-
-&#x20;     │            │            │
-
-&#x20;Log Agent   Runbook Agent  Sensor Agent
-
-&#x20;     │            │            │
-
-&#x20;     └────────────┼────────────┘
-
-&#x20;                  │
-
-&#x20;            Report Agent
-
-&#x20;                  │
-
-&#x20;                  ▼
-
-&#x20;       Executive Incident Report
-
-```
-
-
-
-\## Roadmap
-
-
-
-\- Google ADK Tool Registry
-
-\- MCP Server
-
-\- ChromaDB
-
-\- PDF Export
-
-\- Hugging Face Deployment
-
+## Architecture

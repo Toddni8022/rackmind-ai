@@ -1,0 +1,15 @@
+Cisco Switch Runbook
+
+CRC errors usually indicate:
+
+- Damaged cable
+- Dirty fiber
+- Duplex mismatch
+- Bad transceiver
+
+If switch temperature exceeds 90F:
+
+1. Inspect airflow
+2. Check cooling
+3. Verify fan operation
+4. Replace failed hardware if necessary

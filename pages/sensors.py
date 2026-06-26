@@ -1,6 +1,8 @@
 import streamlit as st
 import pandas as pd
 
+from agents.coordinator import coordinate_sensor_workflow
+
 
 def show_sensors():
 
@@ -39,62 +41,48 @@ def show_sensors():
 
         st.line_chart(df[column])
 
+    summary = {}
+
+    for column in numeric_columns:
+
+        summary[column] = {
+            "min": float(df[column].min()),
+            "max": float(df[column].max()),
+            "mean": round(float(df[column].mean()), 2),
+        }
+
     st.divider()
+
+    col1, col2, col3 = st.columns(3)
 
     if "temperature" in df.columns:
 
-        max_temp = df["temperature"].max()
-        avg_temp = round(df["temperature"].mean(), 1)
-
-        col1, col2 = st.columns(2)
-
         col1.metric(
             "Maximum Temperature",
-            f"{max_temp}°F"
+            f"{df['temperature'].max()}°F",
         )
 
         col2.metric(
             "Average Temperature",
-            f"{avg_temp}°F"
+            f"{round(df['temperature'].mean(), 1)}°F",
         )
 
-        st.divider()
+    if "power_kw" in df.columns:
 
-        st.subheader("🤖 AI Insight")
+        col3.metric(
+            "Peak Power",
+            f"{df['power_kw'].max()} kW",
+        )
 
-        if max_temp >= 90:
+    st.divider()
 
-            st.error(
-                """
-Critical temperature detected.
+    st.subheader("🤖 AI Infrastructure Assessment")
 
-### Recommended Actions
+    with st.spinner("Coordinator Agent analyzing sensor data..."):
 
-- Verify rack airflow
-- Inspect cooling fans
-- Check power utilization
-- Schedule immediate inspection
-"""
-            )
+        report = coordinate_sensor_workflow(summary)
 
-        elif max_temp >= 80:
-
-            st.warning(
-                """
-Elevated temperatures detected.
-
-### Recommended Actions
-
-- Increase monitoring frequency
-- Verify cooling efficiency
-"""
-            )
-
-        else:
-
-            st.success(
-                "Infrastructure temperatures are within normal operating limits."
-            )
+    st.markdown(report)
 
     st.divider()
 

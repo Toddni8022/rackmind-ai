@@ -1,40 +1,38 @@
-from agents.log_agent import analyze_log_summary
-from agents.report_agent import generate_incident_report
+"""
+RackMind AI
 
+Coordinator Agent
 
-class CoordinatorAgent:
+Routes work between specialized agents.
+"""
 
-    def __init__(self):
-
-        self.name = "RackMind Coordinator"
-
-    def analyze(
-        self,
-        log_summary=None,
-        runbook_context="",
-        sensor_context="",
-    ):
-
-        log_report = ""
-
-        if log_summary:
-
-            log_report = analyze_log_summary(log_summary)
-
-        final_report = generate_incident_report(
-            log_report=log_report,
-            runbook_report=runbook_context,
-            sensor_report=sensor_context,
-        )
-
-        return final_report
-
-
-coordinator = CoordinatorAgent()
+from services.incident_service import incident_service
 
 
 def coordinate_log_workflow(summary):
 
-    return coordinator.analyze(
+    return incident_service.analyze(
         log_summary=summary
+    )
+
+
+def coordinate_sensor_workflow(summary):
+
+    return incident_service.analyze(
+        sensor_summary=summary
+    )
+
+
+def coordinate_full_workflow(
+
+    log_summary,
+    sensor_summary,
+    runbook_context,
+
+):
+
+    return incident_service.analyze(
+        log_summary=log_summary,
+        sensor_summary=sensor_summary,
+        runbook_context=runbook_context,
     )

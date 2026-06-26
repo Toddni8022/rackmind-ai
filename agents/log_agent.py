@@ -1,61 +1,33 @@
-import os
+"""
+RackMind AI
 
-from dotenv import load_dotenv
-from google import genai
-
-load_dotenv()
-
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
-
-
-def analyze_log_summary(summary):
-
-    severity = "LOW"
-
-    if summary["errors"] >= 2:
-        severity = "MEDIUM"
-
-    if (
-        summary["crc_errors"] >= 3
-        or summary["max_temperature"] >= 90
-    ):
-        severity = "HIGH"
-
-    prompt = f"""
-You are a Senior Network Operations Engineer.
-
-Infrastructure Summary
-
-{summary}
-
-Generate a professional incident report.
-
-Use this exact format.
-
-# Executive Summary
-
-# Root Cause
-
-# Business Impact
-
-# Recommended Actions
-
-- Action 1
-- Action 2
-- Action 3
-
-# Priority
-
-{severity}
-
-# Confidence
+Log Analysis Agent
 """
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
 
-    return response.text
+def analyze_log_summary(summary: dict) -> str:
+    """
+    Returns a structured log analysis without calling Gemini.
+    """
+
+    report = []
+
+    report.append("### Log Analysis\n")
+
+    report.append(f"- Events: {summary['events']}")
+    report.append(f"- Errors: {summary['errors']}")
+    report.append(f"- Warnings: {summary['warnings']}")
+    report.append(f"- CRC Errors: {summary['crc_errors']}")
+    report.append(f"- Interface Resets: {summary['resets']}")
+
+    if summary["crc_errors"] > 0:
+        report.append(
+            "\nCRC errors indicate possible physical layer issues."
+        )
+
+    if summary["errors"] > 5:
+        report.append(
+            "Multiple switch errors detected."
+        )
+
+    return "\n".join(report)

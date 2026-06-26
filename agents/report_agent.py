@@ -1,35 +1,36 @@
-import os
+"""
+RackMind AI
 
-from dotenv import load_dotenv
-from google import genai
+Report Agent
+"""
 
-load_dotenv()
-
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
+from services.gemini_service import generate
 
 
-def generate_incident_report(log_report="", runbook_report="", sensor_report=""):
+def generate_incident_report(
+    log_report="",
+    runbook_report="",
+    sensor_report="",
+):
 
     prompt = f"""
-You are a Senior Data Center Incident Manager.
+You are an Incident Manager.
 
-Combine the information from multiple AI agents into one professional report.
+Merge these AI reports into one executive report.
 
-Log Agent Output
+Log Report
 
 {log_report}
 
-Runbook Agent Output
+Runbook Report
 
 {runbook_report}
 
-Sensor Agent Output
+Sensor Report
 
 {sensor_report}
 
-Return your response using this format.
+Return:
 
 # Executive Summary
 
@@ -39,18 +40,9 @@ Return your response using this format.
 
 # Recommended Actions
 
-- Action 1
-- Action 2
-- Action 3
-
 # Priority
 
 # Confidence
 """
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt,
-    )
-
-    return response.text
+    return generate(prompt)

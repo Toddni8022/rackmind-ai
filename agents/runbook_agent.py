@@ -1,40 +1,59 @@
-import os
+"""
+RackMind AI
 
-from dotenv import load_dotenv
-from google import genai
+Runbook Agent
+"""
 
-load_dotenv()
-
-client = genai.Client(
-    api_key=os.getenv("GEMINI_API_KEY")
-)
+from services.vector_service import search_runbooks
+from services.gemini_service import generate
 
 
-def search_runbook(question, runbook_text):
+def answer_question(question: str) -> str:
+    """
+    Answer a question using indexed runbooks.
+    """
+
+    docs = search_runbooks(question)
+
+    if not docs:
+
+        return """
+No matching runbook entries were found.
+
+Please index a runbook before asking questions.
+"""
+
+    context = "\n\n".join(docs)
 
     prompt = f"""
-You are a senior data center engineer.
+You are a senior Cisco data center engineer.
 
-Use ONLY the supplied documentation.
+Use ONLY the supplied runbook.
 
-Documentation:
+If the answer is not contained in the runbook,
+say so.
 
-{runbook_text[:15000]}
+========================
 
-Question:
+RUNBOOK
+
+{context}
+
+========================
+
+QUESTION
 
 {question}
 
-Provide a concise answer with:
+========================
 
-- Explanation
-- Recommended actions
-- Confidence
+Provide:
+
+• Answer
+
+• Explanation
+
+• Recommended Actions
 """
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt
-    )
-
-    return response.text
+    return generate(prompt)

@@ -4,22 +4,24 @@ from pages.dashboard import show_dashboard
 from pages.runbook import show_runbook
 from pages.logs import show_logs
 from pages.sensors import show_sensors
+from pages.incident import show_incident
 
 st.set_page_config(
     page_title="RackMind AI",
     page_icon="🖥️",
-    layout="wide"
+    layout="wide",
 )
 
 st.title("🖥️ RackMind AI")
 st.caption("Autonomous Data Center Operations Copilot")
 
-tab1, tab2, tab3, tab4 = st.tabs(
+tab1, tab2, tab3, tab4, tab5 = st.tabs(
     [
         "🏠 Dashboard",
         "📄 Runbook",
         "📜 Log Agent",
         "📊 Sensor Agent",
+        "🚨 Incident Commander",
     ]
 )
 
@@ -34,3 +36,6 @@ with tab3:
 
 with tab4:
     show_sensors()
+
+with tab5:
+    show_incident()

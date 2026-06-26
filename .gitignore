@@ -1,6 +1,30 @@
+# Virtual Environment
 .venv/
-.env
+
+# Python
 __pycache__/
-*.pyc
-.streamlit/
+*.py[cod]
+*.pyo
+
+# Environment Variables
+.env
+
+# Logs
+logs/
 *.log
+
+# VS Code
+.vscode/
+
+# JetBrains
+.idea/
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Generated PDFs
+*.pdf
+
+# Chroma Database (optional)
+data/chroma/
