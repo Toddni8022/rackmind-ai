@@ -4,9 +4,11 @@ RackMind AI
 Central AI Service
 """
 
+import time
+
+from dotenv import load_dotenv
 from google import genai
 from google.genai.errors import ServerError
-from dotenv import load_dotenv
 
 from config import (
     GEMINI_API_KEY,
@@ -19,13 +21,7 @@ from services.logger import (
     error,
 )
 
-import time
-
 load_dotenv()
-
-client = genai.Client(
-    api_key=GEMINI_API_KEY
-)
 
 
 class AIService:
@@ -37,12 +33,36 @@ class AIService:
     def __init__(self):
 
         self.model = GEMINI_MODEL
+        self._client = None
+
+    def _get_client(self):
+
+        if not GEMINI_API_KEY:
+            return None
+
+        if self._client is None:
+            self._client = genai.Client(
+                api_key=GEMINI_API_KEY
+            )
+
+        return self._client
 
     def generate(
         self,
         prompt: str,
         retries: int = 3,
     ) -> str:
+
+        client = self._get_client()
+
+        if client is None:
+            warning("Gemini API key is not configured.")
+
+            return """
+# AI Service Offline
+
+Gemini is not configured. RackMind generated a local deterministic assessment instead.
+"""
 
         info(f"Gemini request using {self.model}")
 
@@ -57,7 +77,7 @@ class AIService:
 
                 info("Gemini request completed successfully.")
 
-                return response.text
+                return response.text or ""
 
             except ServerError as ex:
 
@@ -80,8 +100,6 @@ Model:
 Reason:
 
 {str(ex)}
-
-Please try again shortly.
 """
 
                 time.sleep(2)
@@ -96,7 +114,7 @@ Please try again shortly.
 {str(ex)}
 """
 
-        return "No response returned."
+        return ""
 
 
 ai = AIService()
