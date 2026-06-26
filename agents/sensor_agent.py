@@ -10,33 +10,42 @@ def analyze_sensor_data(summary: dict) -> str:
     Returns sensor observations without using Gemini.
     """
 
+    temperature = summary.get("temperature", {})
+    humidity = summary.get("humidity", {})
+    power = summary.get("power_kw", {})
+
+    max_temp = summary.get("max_temp", temperature.get("max", 0))
+    avg_temp = summary.get("avg_temp", temperature.get("mean", 0))
+    avg_humidity = summary.get("avg_humidity", humidity.get("mean", 0))
+    peak_power = summary.get("peak_power", power.get("max", 0))
+
     report = []
 
     report.append("### Sensor Analysis\n")
 
     report.append(
-        f"- Maximum Temperature: {summary['max_temp']}°F"
+        f"- Maximum Temperature: {max_temp}°F"
     )
 
     report.append(
-        f"- Average Temperature: {summary['avg_temp']}°F"
+        f"- Average Temperature: {avg_temp}°F"
     )
 
     report.append(
-        f"- Average Humidity: {summary['avg_humidity']}%"
+        f"- Average Humidity: {avg_humidity}%"
     )
 
     report.append(
-        f"- Peak Power: {summary['peak_power']} kW"
+        f"- Peak Power: {peak_power} kW"
     )
 
-    if summary["max_temp"] >= 90:
+    if max_temp >= 90:
 
         report.append(
             "\nCritical temperature threshold exceeded."
         )
 
-    elif summary["max_temp"] >= 80:
+    elif max_temp >= 80:
 
         report.append(
             "\nElevated rack temperature detected."
