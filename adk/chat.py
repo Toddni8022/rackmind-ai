@@ -18,6 +18,7 @@ from google.adk.sessions import InMemorySessionService
 
 from adk.root_agent import root_agent
 from adk.incident_tool import investigate_incident
+from agents.runbook_agent import answer_question_local
 
 from services.logger import info, error
 
@@ -26,6 +27,17 @@ USER_ID = "streamlit"
 SESSION_ID = "default"
 
 session_service = InMemorySessionService()
+
+
+def _is_quota_error(message: str) -> bool:
+    markers = (
+        "RESOURCE_EXHAUSTED",
+        "prepayment credits are depleted",
+        "429",
+        "quota",
+    )
+
+    return any(marker.lower() in message.lower() for marker in markers)
 
 
 async def ask_adk(question: str) -> str:
@@ -80,9 +92,19 @@ async def ask_adk(question: str) -> str:
 
     except Exception as ex:
 
-        error(str(ex))
+        message = str(ex)
+        error(message)
 
-        return f"ADK Error:\n\n{str(ex)}"
+        if _is_quota_error(message):
+            return answer_question_local(question)
+
+        return """
+### AI Service Error
+
+RackMind could not reach the cloud reasoning service for this request.
+
+Try again later, or use the Log Agent, Sensor Agent, and Incident Commander tabs for local deterministic analysis.
+"""
 
     info("ADK request completed.")
 
