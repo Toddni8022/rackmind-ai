@@ -6,7 +6,7 @@ from services.assessment_service import (
     build_recommendations,
     score_sensor_summary,
 )
-from services.app_state import dataframe_to_records, save_runtime_state
+from services.app_state import dataframe_to_records, replace_runtime_state
 from services.sensor_parser import parse_sensor_data
 
 
@@ -47,7 +47,13 @@ def show_sensors():
     st.session_state["rackmind_sensor_df"] = df
     st.session_state["rackmind_sensor_summary"] = summary
     st.session_state["rackmind_sensor_source"] = sensor_file.name
-    save_runtime_state(
+    for key in (
+        "rackmind_log_summary",
+        "rackmind_log_source",
+    ):
+        st.session_state.pop(key, None)
+
+    replace_runtime_state(
         sensor_records=dataframe_to_records(df),
         sensor_summary=summary,
         sensor_source=sensor_file.name,

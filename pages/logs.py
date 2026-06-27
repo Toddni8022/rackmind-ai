@@ -5,7 +5,7 @@ from services.assessment_service import (
     build_recommendations,
     score_log_summary,
 )
-from services.app_state import save_runtime_state
+from services.app_state import replace_runtime_state
 from tools.log_reader import analyze_log
 
 
@@ -33,7 +33,14 @@ def show_logs():
 
         st.session_state["rackmind_log_summary"] = summary
         st.session_state["rackmind_log_source"] = logfile.name
-        save_runtime_state(
+        for key in (
+            "rackmind_sensor_df",
+            "rackmind_sensor_summary",
+            "rackmind_sensor_source",
+        ):
+            st.session_state.pop(key, None)
+
+        replace_runtime_state(
             log_summary=summary,
             log_source=logfile.name,
         )

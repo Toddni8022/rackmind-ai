@@ -14,8 +14,10 @@ from services.assessment_service import (
 )
 from services.app_state import (
     clear_runtime_state,
+    dataframe_to_records,
     load_runtime_state,
     records_to_dataframe,
+    save_runtime_state,
 )
 from services.sensor_parser import parse_sensor_data
 from services.vector_service import collection
@@ -46,10 +48,14 @@ def _load_sensor_data():
             True,
         )
 
+    return None, {}, "no sensor data analyzed", False
+
+
+def _load_demo_sensor_data():
     csv_path = Path("sample_data/sensors/rack22.csv")
 
     if not csv_path.exists():
-        return None, {}, "missing sample data", False
+        return False
 
     df = pd.read_csv(csv_path)
     df.columns = df.columns.str.strip().str.lower()
@@ -61,9 +67,19 @@ def _load_sensor_data():
             "Sample sensor data is missing: "
             + ", ".join(sorted(missing_columns))
         )
-        return None, {}, "invalid sample data", False
+        return False
 
-    return df, parse_sensor_data(df), "sample_data/sensors/rack22.csv", False
+    summary = parse_sensor_data(df)
+    st.session_state["rackmind_sensor_df"] = df
+    st.session_state["rackmind_sensor_summary"] = summary
+    st.session_state["rackmind_sensor_source"] = "sample_data/sensors/rack22.csv"
+    save_runtime_state(
+        sensor_records=dataframe_to_records(df),
+        sensor_summary=summary,
+        sensor_source="sample_data/sensors/rack22.csv",
+    )
+
+    return True
 
 
 def _prepare_chart_data(df):
@@ -90,18 +106,19 @@ def show_dashboard():
     runtime_state = load_runtime_state()
     df, sensor_summary, sensor_source, is_live_sensor = _load_sensor_data()
 
-    if df is None:
-        st.error("Sensor data not found.")
-        return
-
     sensor_summary = normalize_sensor_summary(sensor_summary)
-    df, x_axis = _prepare_chart_data(df)
+    x_axis = None
+
+    if df is not None:
+        df, x_axis = _prepare_chart_data(df)
+
     log_summary = st.session_state.get(
         "rackmind_log_summary",
         runtime_state.get("log_summary"),
     )
     log = normalize_log_summary(log_summary)
     scorecard = score_operations(log_summary, sensor_summary)
+    max_temp = max(sensor_summary["max_temp"], log["max_temp"])
 
     runbooks = collection.count()
     alerts = build_alerts(
@@ -121,7 +138,7 @@ def show_dashboard():
 
     c1.metric("Health", scorecard["status"])
     c2.metric("Score", f"{scorecard['score']}/100")
-    c3.metric("Max Temp", f"{sensor_summary['max_temp']:.1f}°F")
+    c3.metric("Max Temp", f"{max_temp:.1f}°F")
     c4.metric("Log Errors", log["errors"])
     c5.metric("CRC Errors", log["crc_errors"])
 
@@ -152,7 +169,7 @@ def show_dashboard():
         if is_live_sensor:
             st.success(f"Sensor data: {sensor_source}")
         else:
-            st.info(f"Sensor data: {sensor_source}")
+            st.info("Sensor data: no sensor file analyzed")
 
         if log_summary:
             st.success(
@@ -168,7 +185,11 @@ def show_dashboard():
         if runtime_state.get("updated_at"):
             st.caption(f"Last analysis: {runtime_state['updated_at']}")
 
-        if st.button("Reset to sample data", width="stretch"):
+        if st.button("Load demo sensor data", width="stretch"):
+            if _load_demo_sensor_data():
+                st.rerun()
+
+        if st.button("Clear dashboard data", width="stretch"):
             for key in (
                 "rackmind_log_summary",
                 "rackmind_log_source",
@@ -183,7 +204,7 @@ def show_dashboard():
 
         st.subheader("Readiness")
         st.metric("Indexed Runbooks", runbooks)
-        st.metric("Telemetry Samples", len(df))
+        st.metric("Telemetry Samples", len(df) if df is not None else 0)
         st.metric("Severity", scorecard["severity"])
         st.metric("Interface Resets", log["resets"])
 
@@ -194,7 +215,10 @@ def show_dashboard():
 
     st.divider()
 
-    if "temperature" in df.columns:
+    if df is None:
+        st.info("Analyze a sensor file to show telemetry charts, or load demo sensor data.")
+
+    elif "temperature" in df.columns:
         fig_temp = px.line(
             df,
             x=x_axis,
@@ -234,66 +258,67 @@ def show_dashboard():
     else:
         st.info("No temperature column is available for dashboard trend charts.")
 
-    col_a, col_b = st.columns(2)
+    if df is not None:
+        col_a, col_b = st.columns(2)
 
-    with col_a:
-        if "humidity" in df.columns:
-            fig_humidity = px.line(
-                df,
-                x=x_axis,
-                y="humidity",
-                title="Humidity Trend",
-                markers=True,
-                color_discrete_sequence=["#10b981"],
-            )
-            fig_humidity.update_layout(
-                template="plotly_dark",
-                paper_bgcolor="rgba(15, 23, 42, 0)",
-                plot_bgcolor="rgba(15, 23, 42, 0.38)",
-                font_color="#e0f2fe",
-                height=320,
-                xaxis_title="Time" if x_axis == "timestamp" else "Reading",
-                yaxis_title="Humidity (%)",
-            )
-            st.plotly_chart(
-                fig_humidity,
-                width="stretch",
-                config={"displaylogo": False},
-            )
-        else:
-            st.info("No humidity column is available.")
+        with col_a:
+            if "humidity" in df.columns:
+                fig_humidity = px.line(
+                    df,
+                    x=x_axis,
+                    y="humidity",
+                    title="Humidity Trend",
+                    markers=True,
+                    color_discrete_sequence=["#10b981"],
+                )
+                fig_humidity.update_layout(
+                    template="plotly_dark",
+                    paper_bgcolor="rgba(15, 23, 42, 0)",
+                    plot_bgcolor="rgba(15, 23, 42, 0.38)",
+                    font_color="#e0f2fe",
+                    height=320,
+                    xaxis_title="Time" if x_axis == "timestamp" else "Reading",
+                    yaxis_title="Humidity (%)",
+                )
+                st.plotly_chart(
+                    fig_humidity,
+                    width="stretch",
+                    config={"displaylogo": False},
+                )
+            else:
+                st.info("No humidity column is available.")
 
-    with col_b:
-        if "power_kw" in df.columns:
-            fig_power = px.area(
-                df,
-                x=x_axis,
-                y="power_kw",
-                title="Power Consumption",
-                color_discrete_sequence=["#ec4899"],
-            )
-            fig_power.add_hline(
-                y=4.5,
-                line_dash="dash",
-                line_color="orange",
-                annotation_text="High draw",
-            )
-            fig_power.update_layout(
-                template="plotly_dark",
-                paper_bgcolor="rgba(15, 23, 42, 0)",
-                plot_bgcolor="rgba(15, 23, 42, 0.38)",
-                font_color="#e0f2fe",
-                height=320,
-                xaxis_title="Time" if x_axis == "timestamp" else "Reading",
-                yaxis_title="Power (kW)",
-            )
-            st.plotly_chart(
-                fig_power,
-                width="stretch",
-                config={"displaylogo": False},
-            )
-        else:
-            st.info("No power_kw column is available.")
+        with col_b:
+            if "power_kw" in df.columns:
+                fig_power = px.area(
+                    df,
+                    x=x_axis,
+                    y="power_kw",
+                    title="Power Consumption",
+                    color_discrete_sequence=["#ec4899"],
+                )
+                fig_power.add_hline(
+                    y=4.5,
+                    line_dash="dash",
+                    line_color="orange",
+                    annotation_text="High draw",
+                )
+                fig_power.update_layout(
+                    template="plotly_dark",
+                    paper_bgcolor="rgba(15, 23, 42, 0)",
+                    plot_bgcolor="rgba(15, 23, 42, 0.38)",
+                    font_color="#e0f2fe",
+                    height=320,
+                    xaxis_title="Time" if x_axis == "timestamp" else "Reading",
+                    yaxis_title="Power (kW)",
+                )
+                st.plotly_chart(
+                    fig_power,
+                    width="stretch",
+                    config={"displaylogo": False},
+                )
+            else:
+                st.info("No power_kw column is available.")
 
     st.divider()
     st.caption("RackMind AI v1.0 | Google ADK | Gemini | ChromaDB")

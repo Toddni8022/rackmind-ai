@@ -42,6 +42,21 @@ def save_runtime_state(**updates) -> dict:
     return state
 
 
+def replace_runtime_state(**updates) -> dict:
+    state = {
+        **updates,
+        "updated_at": datetime.now().isoformat(timespec="seconds"),
+    }
+
+    STATE_FILE.parent.mkdir(parents=True, exist_ok=True)
+    STATE_FILE.write_text(
+        json.dumps(state, indent=2),
+        encoding="utf-8",
+    )
+
+    return state
+
+
 def clear_runtime_state() -> None:
     if STATE_FILE.exists():
         STATE_FILE.unlink()

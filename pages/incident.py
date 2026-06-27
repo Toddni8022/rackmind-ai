@@ -8,7 +8,7 @@ from services.assessment_service import (
     score_log_summary,
     score_sensor_summary,
 )
-from services.app_state import dataframe_to_records, save_runtime_state
+from services.app_state import dataframe_to_records, replace_runtime_state
 from services.log_parser import parse_log
 from services.pdf_service import create_report
 from services.sensor_parser import parse_sensor_data
@@ -65,7 +65,7 @@ def show_incident():
         st.session_state["rackmind_sensor_df"] = sensor_df
         st.session_state["rackmind_sensor_summary"] = sensor_summary
         st.session_state["rackmind_sensor_source"] = sensor_file.name
-        save_runtime_state(
+        replace_runtime_state(
             log_summary=log_summary,
             log_source=log_file.name,
             sensor_records=dataframe_to_records(sensor_df),
