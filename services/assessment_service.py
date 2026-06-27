@@ -42,15 +42,18 @@ def normalize_sensor_summary(summary: dict | None) -> dict:
 def score_log_summary(summary: dict | None) -> dict:
     log = normalize_log_summary(summary)
     score = 100
-    score -= log["errors"] * 8
-    score -= log["warnings"] * 2
-    score -= log["crc_errors"] * 4
-    score -= log["resets"] * 5
+    score -= min(log["errors"] * 6, 42)
+    score -= min(log["warnings"] * 2, 14)
+    score -= min(log["crc_errors"] * 4, 24)
+    score -= min(log["resets"] * 8, 18)
 
     if log["max_temp"] >= 90:
         score -= 18
     elif log["max_temp"] >= 80:
         score -= 8
+
+    if log["events"] and score < 15:
+        score = 15
 
     return build_scorecard(score)
 
