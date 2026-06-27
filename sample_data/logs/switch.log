@@ -1,0 +1,14 @@
+2026-06-21 18:03:40 INFO Rack22 Temperature 72F
+2026-06-21 18:05:11 WARNING CRC error detected on Gi1/0/12
+2026-06-21 18:05:13 WARNING CRC error detected on Gi1/0/12
+2026-06-21 18:05:15 WARNING CRC error detected on Gi1/0/12
+2026-06-21 18:06:01 INFO Rack22 Temperature 77F
+2026-06-21 18:08:20 INFO Rack22 Temperature 82F
+2026-06-21 18:09:00 ERROR Temperature threshold exceeded (87F)
+2026-06-21 18:09:15 ERROR Interface Gi1/0/12 reset initiated
+2026-06-21 18:09:45 INFO Interface reset complete
+2026-06-21 18:10:20 WARNING CRC error detected on Gi1/0/12
+2026-06-21 18:11:00 INFO Rack22 Temperature 91F
+2026-06-21 18:11:10 ERROR Critical temperature threshold exceeded
+2026-06-21 18:13:00 ERROR Interface Gi1/0/12 reset initiated
+2026-06-21 18:14:05 WARNING CRC error detected on Gi1/0/12

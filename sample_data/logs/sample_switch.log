@@ -1,0 +1,12 @@
+2026-06-26 18:00:01 INFO switch01 boot complete
+2026-06-26 18:02:14 WARNING interface Gi1/0/22 crc error detected
+2026-06-26 18:03:02 ERROR interface Gi1/0/22 packet drops increasing
+2026-06-26 18:05:47 WARNING temperature threshold reached 82F
+2026-06-26 18:07:25 ERROR crc error burst on interface Gi1/0/22
+2026-06-26 18:09:31 WARNING fan speed below expected range
+2026-06-26 18:10:09 ERROR critical temperature 91F
+2026-06-26 18:10:40 WARNING crc error detected on uplink Te1/1/1
+2026-06-26 18:11:12 ERROR reset initiated on interface Gi1/0/22
+2026-06-26 18:12:22 WARNING temperature threshold reached 92F
+2026-06-26 18:13:07 ERROR crc error detected on interface Gi1/0/22
+2026-06-26 18:15:00 INFO cooling inspection recommended

@@ -12,6 +12,8 @@ __pycache__/
 # Logs
 logs/
 *.log
+!sample_data/logs/
+!sample_data/logs/*.log
 
 # VS Code
 .vscode/
@@ -28,3 +30,6 @@ Thumbs.db
 
 # Chroma Database (optional)
 data/chroma/
+
+# Runtime dashboard state
+data/runtime_state.json
