@@ -15,3 +15,9 @@ font="sans serif"
 [browser]
 
 gatherUsageStats=false
+
+[client]
+
+# The app uses its own tab navigation in rackmind.py; hide the
+# auto-generated pages/ sidebar so auth-gated tabs stay gated.
+showSidebarNavigation=false

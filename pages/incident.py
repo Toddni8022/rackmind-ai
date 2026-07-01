@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from adk.chat import investigate
+from services.incident_archive import save_incident
 from services.pdf_service import create_report
 
 
@@ -64,6 +65,16 @@ def show_incident():
         )
 
         st.markdown(report)
+
+        incident_id = save_incident(
+            report,
+            source="incident_commander",
+        )
+
+        st.caption(
+            f"🗂️ Saved to incident archive as #{incident_id}. "
+            "Search past incidents on the History tab."
+        )
 
         filename = create_report(report)
 

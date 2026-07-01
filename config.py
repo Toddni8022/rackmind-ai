@@ -36,7 +36,7 @@ def _get_secret(name: str, default=None):
 
 APP_NAME = "RackMind AI"
 
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.1.0"
 
 # --------------------------------------------------
 # AI Provider

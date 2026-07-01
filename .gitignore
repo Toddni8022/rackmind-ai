@@ -28,3 +28,9 @@ Thumbs.db
 
 # Chroma Database (optional)
 data/chroma/
+
+# RackMind SQLite database (incidents, telemetry, users)
+data/rackmind.db
+
+# Pytest
+.pytest_cache/

@@ -2,6 +2,7 @@ import streamlit as st
 
 from tools.log_reader import analyze_log
 from agents.coordinator import coordinate_log_workflow
+from services.scoring import compute_health_score
 
 
 def show_logs():
@@ -50,12 +51,7 @@ def show_logs():
             f'{summary["max_temperature"]}°F',
         )
 
-        score = 100
-        score -= summary["errors"] * 8
-        score -= summary["warnings"] * 2
-        score -= summary["crc_errors"] * 3
-
-        score = max(score, 0)
+        score = compute_health_score(summary)
 
         st.divider()
 

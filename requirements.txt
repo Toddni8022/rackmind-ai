@@ -8,3 +8,8 @@ openai
 pypdf
 graphviz
 reportlab
+pytest
+
+# Optional live-telemetry connector clients (install as needed):
+# pysnmp   -> SNMP connector
+# boto3    -> AWS CloudWatch connector
