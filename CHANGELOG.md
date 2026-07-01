@@ -16,6 +16,12 @@
 - Main app now gates tabs behind login when authentication is enabled (RACKMIND_AUTH=off restores open access).
 - Streamlit auto sidebar navigation disabled so auth-gated tabs stay gated.
 
+### Fixed
+
+- Log severity is now read from the log's level token (ERROR/WARNING/CRIT/...), so "WARNING CRC error detected" lines are no longer double-counted as both warnings and errors.
+- Interface reset counts no longer include "reset complete" recovery messages.
+- Executive report prompts are grounded: empty log/sensor/runbook sections are marked NOT PROVIDED and the model is instructed not to invent metrics, ports, sensor readings, or runbook titles, and not to rule out causes the data supports.
+
 ## v0.7
 
 ### Added

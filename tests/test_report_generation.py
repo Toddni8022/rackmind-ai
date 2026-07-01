@@ -2,6 +2,7 @@
 Tests for the deterministic (non-LLM) report generators.
 """
 
+import agents.report_agent as report_agent
 from agents.executive_summary_agent import generate_executive_summary
 from agents.incident_report_agent import generate_incident_report
 from agents.log_agent import analyze_log_summary
@@ -117,6 +118,58 @@ class TestExecutiveSummary:
         assert "Healthy" in summary
         assert "Low (10%)" in summary
         assert "stable" in summary.lower()
+
+
+class TestReportAgentGrounding:
+    """
+    The executive report prompt must be grounded: missing sections
+    are marked NOT PROVIDED so the model cannot invent their
+    contents, and anti-fabrication rules are always included.
+    """
+
+    def _capture_prompt(self, monkeypatch, **kwargs):
+        captured = {}
+
+        def fake_generate(prompt):
+            captured["prompt"] = prompt
+            return "report"
+
+        monkeypatch.setattr(report_agent, "generate", fake_generate)
+
+        report_agent.generate_incident_report(**kwargs)
+
+        return captured["prompt"]
+
+    def test_missing_sections_marked_not_provided(self, monkeypatch):
+        prompt = self._capture_prompt(
+            monkeypatch,
+            log_report="5 CRC errors on Gi1/0/12",
+        )
+
+        assert "5 CRC errors on Gi1/0/12" in prompt
+        # Once in the ground rules + once per missing section.
+        assert prompt.count("NOT PROVIDED") == 3
+
+    def test_all_sections_included_when_present(self, monkeypatch):
+        prompt = self._capture_prompt(
+            monkeypatch,
+            log_report="log data",
+            runbook_report="runbook data",
+            sensor_report="sensor data",
+        )
+
+        assert "log data" in prompt
+        assert "runbook data" in prompt
+        assert "sensor data" in prompt
+        # Only the ground-rules mention remains; no section is empty.
+        assert prompt.count("NOT PROVIDED") == 1
+
+    def test_anti_fabrication_rules_always_present(self, monkeypatch):
+        prompt = self._capture_prompt(monkeypatch, log_report="x")
+
+        assert "Do not invent" in prompt
+        assert "Never infer or fabricate" in prompt
+        assert "do not rule out causes the" in prompt
 
 
 class TestRootCauseAgent:

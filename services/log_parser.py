@@ -9,6 +9,29 @@ for the Log Agent.
 
 import re
 
+# Uppercase level tokens as emitted by syslog-style network gear.
+# Severity is taken from these tokens, never from words inside the
+# message text, so "WARNING CRC error detected" is one warning and
+# zero errors.
+ERROR_TOKENS = re.compile(r"\b(?:ERROR|ERR|CRITICAL|CRIT|ALERT|FATAL|EMERG)\b")
+
+WARNING_TOKENS = re.compile(r"\b(?:WARNING|WARN)\b")
+
+
+def line_severity(line: str) -> str | None:
+    """
+    Classify a log line as "error", "warning", or None using its
+    uppercase severity token.
+    """
+
+    if ERROR_TOKENS.search(line):
+        return "error"
+
+    if WARNING_TOKENS.search(line):
+        return "warning"
+
+    return None
+
 
 def parse_log(log_text: str) -> dict:
 
@@ -27,18 +50,21 @@ def parse_log(log_text: str) -> dict:
 
     for line in lines:
 
-        upper = line.upper()
+        severity = line_severity(line)
 
-        if "WARNING" in upper:
+        if severity == "warning":
             summary["warnings"] += 1
-
-        if "ERROR" in upper:
+        elif severity == "error":
             summary["errors"] += 1
+
+        upper = line.upper()
 
         if "CRC" in upper:
             summary["crc_errors"] += 1
 
-        if "RESET" in upper:
+        # Only count actual reset events, not the recovery
+        # messages ("reset complete") that follow them.
+        if "RESET INITIATED" in upper:
             summary["resets"] += 1
 
         match = temp_pattern.search(line)

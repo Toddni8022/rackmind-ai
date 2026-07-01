@@ -1,5 +1,7 @@
 from collections import Counter
 
+from services.log_parser import line_severity
+
 
 def analyze_log(uploaded_file):
 
@@ -15,13 +17,16 @@ def analyze_log(uploaded_file):
 
     for line in lines:
 
-        upper = line.upper()
+        # Severity comes from the log's level token, so message
+        # text like "CRC error detected" is not counted as an error.
+        severity = line_severity(line)
 
-        if "WARNING" in upper:
+        if severity == "warning":
             counts["warnings"] += 1
-
-        if "ERROR" in upper:
+        elif severity == "error":
             counts["errors"] += 1
+
+        upper = line.upper()
 
         if "CRC ERROR" in upper:
             counts["crc_errors"] += 1

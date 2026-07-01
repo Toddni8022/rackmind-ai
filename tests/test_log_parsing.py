@@ -3,9 +3,35 @@ Tests for services.log_parser and tools.log_reader.
 """
 
 import io
+from pathlib import Path
 
-from services.log_parser import parse_log
+from services.log_parser import line_severity, parse_log
 from tools.log_reader import analyze_log
+
+SAMPLE_SWITCH_LOG = (
+    Path(__file__).resolve().parent.parent / "data" / "switch.log"
+)
+
+
+class TestLineSeverity:
+
+    def test_severity_comes_from_level_token(self):
+        assert line_severity("2026-06-21 ERROR Interface reset") == "error"
+        assert line_severity("2026-06-21 WARNING Fan speed low") == "warning"
+        assert line_severity("2026-06-21 INFO Boot complete") is None
+
+    def test_message_text_does_not_set_severity(self):
+        # "error" inside the message is not a severity token.
+        assert line_severity(
+            "WARNING CRC error detected on Gi1/0/12"
+        ) == "warning"
+
+        assert line_severity("An error occurred somewhere") is None
+
+    def test_critical_variants_count_as_errors(self):
+        assert line_severity("CRITICAL temperature exceeded") == "error"
+        assert line_severity("switch01 CRIT fan failure") == "error"
+        assert line_severity("kernel: FATAL power loss") == "error"
 
 
 class TestParseLog:
@@ -15,9 +41,9 @@ class TestParseLog:
 
         assert summary["events"] == 7
         assert summary["warnings"] == 2
-        # "CRC error" lines match the ERROR substring too, so the two
-        # WARNING CRC lines are also counted as errors (2 + 2).
-        assert summary["errors"] == 4
+        # Only the two ERROR-level lines count as errors; the two
+        # "WARNING CRC error" lines are warnings + CRC events.
+        assert summary["errors"] == 2
         assert summary["crc_errors"] == 2
         assert summary["resets"] == 1
 
@@ -36,13 +62,23 @@ class TestParseLog:
         assert summary["resets"] == 0
         assert summary["max_temp"] == 0
 
-    def test_case_insensitive_matching(self):
-        summary = parse_log("warning: crc error\nError: reset now")
+    def test_crc_warnings_are_not_double_counted_as_errors(self):
+        summary = parse_log(
+            "WARNING CRC error detected on Gi1/0/12\n"
+            "WARNING CRC error detected on Gi1/0/12"
+        )
 
-        assert summary["warnings"] == 1
-        assert summary["crc_errors"] == 1
-        # Both lines contain the "error" substring.
-        assert summary["errors"] == 2
+        assert summary["warnings"] == 2
+        assert summary["crc_errors"] == 2
+        assert summary["errors"] == 0
+
+    def test_reset_recovery_messages_are_not_counted_as_resets(self):
+        summary = parse_log(
+            "ERROR Interface Gi1/0/12 reset initiated\n"
+            "INFO Interface reset complete\n"
+            "INFO Interface recovered"
+        )
+
         assert summary["resets"] == 1
 
     def test_lines_without_events_only_count_as_events(self):
@@ -50,6 +86,16 @@ class TestParseLog:
 
         assert summary["events"] == 2
         assert summary["errors"] == 0
+
+    def test_bundled_sample_switch_log(self):
+        summary = parse_log(SAMPLE_SWITCH_LOG.read_text(encoding="utf-8"))
+
+        assert summary["events"] == 25
+        assert summary["warnings"] == 10
+        assert summary["errors"] == 4
+        assert summary["crc_errors"] == 5
+        assert summary["resets"] == 2
+        assert summary["max_temp"] == 91
 
 
 class TestAnalyzeLog:
@@ -62,8 +108,9 @@ class TestAnalyzeLog:
 
         assert summary["total_events"] == 7
         assert summary["warnings"] == 2
-        # CRC warning lines also contain the ERROR substring (2 + 2).
-        assert summary["errors"] == 4
+        # Severity comes from the level token, so the two WARNING CRC
+        # lines are not also counted as errors.
+        assert summary["errors"] == 2
         assert summary["crc_errors"] == 2
         assert summary["interface_resets"] == 1
         assert summary["max_temperature"] == 91
@@ -88,3 +135,15 @@ class TestAnalyzeLog:
         assert summary["total_events"] == 0
         assert summary["timeline"] == []
         assert summary["max_temperature"] == 0
+
+    def test_bundled_sample_switch_log(self):
+        summary = analyze_log(
+            self._upload(SAMPLE_SWITCH_LOG.read_text(encoding="utf-8"))
+        )
+
+        assert summary["total_events"] == 25
+        assert summary["warnings"] == 10
+        assert summary["errors"] == 4
+        assert summary["crc_errors"] == 5
+        assert summary["interface_resets"] == 2
+        assert summary["max_temperature"] == 91

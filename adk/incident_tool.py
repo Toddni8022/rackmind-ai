@@ -43,7 +43,7 @@ def investigate_incident(
         "CRC high temperature cooling"
     )
 
-    runbook_context = "\n\n".join(docs)
+    runbook_context = "\n\n".join(docs).strip() or "NOT PROVIDED"
 
     # -----------------------------
     # Build ONE prompt
@@ -53,6 +53,19 @@ def investigate_incident(
 You are a senior data center engineer.
 
 Analyze the incident.
+
+Ground rules — follow these strictly:
+
+- Use ONLY the data provided below. Do not invent metrics, interface
+  names, port numbers, sensor readings, runbook titles, versions, or
+  troubleshooting steps that were already performed.
+- Sections marked NOT PROVIDED contain no data. State "No data
+  provided" for them. Never infer or fabricate their contents.
+- If the provided data points to environmental problems (temperature,
+  cooling, fans, power), address them; do not rule out causes the
+  data supports.
+- Base your Confidence level on how much data was actually provided.
+- Cite only numbers and events that appear verbatim in the data below.
 
 =========================
 LOG SUMMARY
