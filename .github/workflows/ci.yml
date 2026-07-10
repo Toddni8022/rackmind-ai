@@ -15,4 +15,4 @@ jobs:
           cache: pip
       - run: pip install -r requirements-test.txt
       - run: python -m compileall -q agents services tools pages
-      - run: pytest -q
+      - run: python -m pytest -q
