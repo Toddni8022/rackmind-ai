@@ -75,6 +75,11 @@ def score_sensor_summary(summary: dict | None) -> dict:
     if sensor["avg_humidity"] and not 35 <= sensor["avg_humidity"] <= 60:
         score -= 8
 
+    # A critical thermal threshold must never be softened to merely
+    # "Degraded" by an otherwise healthy set of readings.
+    if sensor["max_temp"] >= 90:
+        score = min(score, 54)
+
     return build_scorecard(score)
 
 
