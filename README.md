@@ -218,6 +218,19 @@ OPENAI_MODEL = "gpt-5.5"
 GEMINI_MODEL = "gemini-2.5-flash"
 ```
 
+## Verification and Limitations
+
+The deterministic parsers can be verified without sending infrastructure data to an AI provider:
+
+```bash
+pip install -r requirements-test.txt
+python -m pytest -q
+```
+
+- AI root-cause summaries are hypotheses and must be checked against live device state.
+- Thresholds and sample data demonstrate a workflow; they are not a substitute for facility alarm policy.
+- The project does not connect directly to production switches, BMS, DCIM, paging, or ticketing systems.
+
 In auto mode, RackMind uses OpenAI when `OPENAI_API_KEY` is present. If no OpenAI key is present, it falls back to Gemini when a Google key is present.
 
 A valid Gemini key usually starts with `AIza`. A valid OpenAI key usually starts with `sk-`.
