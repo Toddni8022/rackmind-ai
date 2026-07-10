@@ -100,3 +100,17 @@ Use these checks before submitting:
 .\.venv\Scripts\python.exe -m py_compile rackmind.py pages\*.py services\*.py agents\*.py adk\*.py tools\*.py
 .\.venv\Scripts\python.exe -c "from services.assessment_service import score_operations; print(score_operations({'errors': 2}, {'max_temp': 92, 'peak_power': 4.9}))"
 ```
+
+Core deterministic scoring and parsing are covered by offline tests, so CI does not require an API key:
+
+```powershell
+python -m pip install -r requirements-test.txt
+python -m pytest -q
+```
+
+## Responsible AI and Limitations
+
+- Deterministic telemetry evidence remains visible even when an LLM summary is enabled.
+- Generated root-cause statements are investigation hypotheses, not proof of hardware failure.
+- Sample thresholds illustrate an operations workflow and must be calibrated to facility policy before production use.
+- This portfolio project does not connect to live switches, BMS platforms, DCIM systems, or paging tools.
