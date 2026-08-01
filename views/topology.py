@@ -1,6 +1,7 @@
-import streamlit as st
 import pandas as pd
-from pathlib import Path
+import streamlit as st
+
+from config import APP_NAME, APP_VERSION, SAMPLE_DIR, TEMP_CRITICAL, TEMP_WARNING
 
 
 def show_topology():
@@ -9,7 +10,7 @@ def show_topology():
 
     st.caption("Current Data Center Infrastructure Status")
 
-    csv_path = Path("sample_data/sensors/rack22.csv")
+    csv_path = SAMPLE_DIR / "sensors" / "rack22.csv"
 
     rack22 = "🟢 Healthy"
 
@@ -17,20 +18,21 @@ def show_topology():
 
         df = pd.read_csv(csv_path)
 
-        # Normalize column names
         df.columns = (
             df.columns
             .str.strip()
             .str.lower()
         )
 
-        max_temp = df["temperature"].max()
+        if "temperature" in df.columns:
 
-        if max_temp >= 90:
-            rack22 = "🔴 Critical"
+            max_temp = df["temperature"].max()
 
-        elif max_temp >= 80:
-            rack22 = "🟡 Warning"
+            if max_temp >= TEMP_CRITICAL:
+                rack22 = "🔴 Critical"
+
+            elif max_temp >= TEMP_WARNING:
+                rack22 = "🟡 Warning"
 
     topology = pd.DataFrame(
         {
@@ -93,4 +95,4 @@ def show_topology():
 
     st.divider()
 
-    st.caption("RackMind AI v1.0 | Infrastructure Topology")
+    st.caption(f"{APP_NAME} v{APP_VERSION} | Infrastructure Topology")

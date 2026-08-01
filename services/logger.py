@@ -5,10 +5,8 @@ Application Logger
 """
 
 import logging
-from pathlib import Path
 
-LOG_DIR = Path("logs")
-LOG_DIR.mkdir(exist_ok=True)
+from config import LOG_DIR
 
 LOG_FILE = LOG_DIR / "rackmind.log"
 

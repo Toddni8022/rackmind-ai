@@ -5,6 +5,4 @@ python-dotenv
 google-genai
 google-adk
 openai
-pypdf
-graphviz
 reportlab

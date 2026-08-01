@@ -1,7 +1,7 @@
 import streamlit as st
 
-from tools.log_reader import analyze_log
 from agents.coordinator import coordinate_log_workflow
+from services.log_parser import build_log_timeline, compute_health_score, parse_log
 
 
 def show_logs():
@@ -25,7 +25,9 @@ def show_logs():
 
         with st.spinner("Reading infrastructure log..."):
 
-            summary = analyze_log(logfile)
+            log_text = logfile.read().decode("utf-8", errors="replace")
+            summary = parse_log(log_text)
+            timeline = build_log_timeline(log_text)
 
         st.divider()
 
@@ -33,7 +35,7 @@ def show_logs():
 
         c1, c2, c3, c4 = st.columns(4)
 
-        c1.metric("Events", summary["total_events"])
+        c1.metric("Events", summary["events"])
         c2.metric("Warnings", summary["warnings"])
         c3.metric("Errors", summary["errors"])
         c4.metric("CRC Errors", summary["crc_errors"])
@@ -42,20 +44,15 @@ def show_logs():
 
         c5.metric(
             "Interface Resets",
-            summary["interface_resets"],
+            summary["resets"],
         )
 
         c6.metric(
             "Max Temperature",
-            f'{summary["max_temperature"]}°F',
+            f'{summary["max_temp"]}°F',
         )
 
-        score = 100
-        score -= summary["errors"] * 8
-        score -= summary["warnings"] * 2
-        score -= summary["crc_errors"] * 3
-
-        score = max(score, 0)
+        score = compute_health_score(summary)
 
         st.divider()
 
@@ -74,8 +71,11 @@ def show_logs():
 
         st.subheader("📅 Incident Timeline")
 
-        for event in summary["timeline"]:
-            st.markdown(f"- {event}")
+        if timeline:
+            for event in timeline:
+                st.markdown(f"- {event}")
+        else:
+            st.markdown("No noteworthy events detected.")
 
         st.divider()
 

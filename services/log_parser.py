@@ -36,3 +36,13 @@ def build_log_timeline(log_text: str, limit: int = 25) -> list[str]:
     """Return the first noteworthy events without flooding the UI or prompt."""
     patterns = (WARNING_PATTERN, ERROR_PATTERN, CRC_PATTERN, RESET_PATTERN)
     return [line for line in _nonempty_lines(log_text) if any(p.search(line) for p in patterns)][:limit]
+
+
+def compute_health_score(summary: dict) -> int:
+    """Score network health 0-100 from a parse_log() summary."""
+    score = 100
+    score -= summary.get("errors", 0) * 8
+    score -= summary.get("warnings", 0) * 2
+    score -= summary.get("crc_errors", 0) * 3
+    score -= summary.get("resets", 0) * 5
+    return max(score, 0)

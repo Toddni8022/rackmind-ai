@@ -4,8 +4,8 @@ RackMind AI
 Runbook Agent
 """
 
-from services.vector_service import search_runbooks
 from services.gemini_service import generate
+from services.vector_service import search_runbooks
 
 
 def answer_question(question: str) -> str:

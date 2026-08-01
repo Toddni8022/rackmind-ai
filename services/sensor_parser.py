@@ -9,7 +9,6 @@ for the Sensor Agent.
 
 import pandas as pd
 
-
 COLUMN_ALIASES = {
     "temperature": (
         "temperature",

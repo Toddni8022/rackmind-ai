@@ -6,14 +6,12 @@ Google ADK Root Agent
 
 from google.adk.agents import Agent
 
+from adk.incident_tool import investigate_incident
 from adk.tools import (
     analyze_logs,
     analyze_sensors,
     search_runbooks,
 )
-
-from adk.incident_tool import investigate_incident
-
 
 root_agent = Agent(
     name="rackmind_coordinator",

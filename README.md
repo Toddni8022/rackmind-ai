@@ -91,23 +91,31 @@ rackmind-ai/
     runbook_agent.py       # Runbook Q&A agent
     report_agent.py        # Incident report agent
 
-  pages/
+  adk/
+    root_agent.py          # Google ADK coordinator agent
+    chat.py                # ADK runner used by the UI
+    incident_tool.py       # Single-prompt incident investigation
+
+  views/
     dashboard.py           # Dashboard tab
     logs.py                # Log analysis tab
     sensors.py             # Sensor analytics tab
     runbook.py             # Runbook search tab
     incident.py            # Incident commander tab
-    topology.py            # Topology view
+    topology.py            # Topology tab
 
   services/
-    gemini_service.py      # Central AI provider service
-    log_parser.py          # Log parser
+    gemini_service.py      # Central AI provider service (Gemini + OpenAI)
+    log_parser.py          # Deterministic log parser + health score
     sensor_parser.py       # Sensor CSV parser
-    vector_service.py      # Runbook search service
+    vector_service.py      # Keyword runbook search service
     incident_service.py    # Incident coordination service
+    pdf_service.py         # In-memory PDF report export
     logger.py              # App logging
 
-  data/                    # Sample logs, sensors, and runbooks
+  tests/                   # Offline unit tests (no API keys needed)
+  sample_data/             # Sample sensors and runbooks
+  data/                    # Sample logs and telemetry
   .streamlit/              # Streamlit settings
 ```
 
@@ -146,7 +154,11 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Create a local `.env` file.
+Create a local `.env` file (start from the provided template):
+
+```bash
+cp .env.example .env
+```
 
 For automatic provider selection:
 
@@ -220,12 +232,15 @@ GEMINI_MODEL = "gemini-2.5-flash"
 
 ## Verification and Limitations
 
-The deterministic parsers can be verified without sending infrastructure data to an AI provider:
+The deterministic parsers, agents, runbook search, and PDF export can be verified without sending infrastructure data to an AI provider:
 
 ```bash
 pip install -r requirements-test.txt
+ruff check .
 python -m pytest -q
 ```
+
+The same checks run in CI on every push and pull request.
 
 - AI root-cause summaries are hypotheses and must be checked against live device state.
 - Thresholds and sample data demonstrate a workflow; they are not a substitute for facility alarm policy.

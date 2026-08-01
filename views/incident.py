@@ -1,8 +1,8 @@
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
 from adk.chat import investigate
-from services.pdf_service import create_report
+from services.pdf_service import create_report, report_filename
 
 
 def show_incident():
@@ -31,28 +31,28 @@ def show_incident():
     ):
 
         if log_file is None:
-
-            st.warning(
-                "Please upload a switch log."
-            )
-
+            st.warning("Please upload a switch log.")
             return
 
         if sensor_file is None:
+            st.warning("Please upload a sensor CSV.")
+            return
 
-            st.warning(
-                "Please upload a sensor CSV."
-            )
+        log_text = log_file.read().decode("utf-8", errors="replace")
 
+        try:
+            sensor_df = pd.read_csv(sensor_file)
+        except Exception as ex:
+            st.error(f"Unable to read sensor CSV: {ex}")
+            return
+
+        if sensor_df.empty:
+            st.warning("The uploaded sensor CSV does not contain any rows.")
             return
 
         with st.spinner(
             "Investigating infrastructure incident..."
         ):
-
-            log_text = log_file.read().decode("utf-8")
-
-            sensor_df = pd.read_csv(sensor_file)
 
             report = investigate(
                 log_text,
@@ -65,19 +65,15 @@ def show_incident():
 
         st.markdown(report)
 
-        filename = create_report(report)
-
-        with open(filename, "rb") as pdf:
-
-            st.download_button(
-                label="📄 Download Executive Report",
-                data=pdf,
-                file_name=filename,
-                mime="application/pdf",
-            )
+        st.download_button(
+            label="📄 Download Executive Report",
+            data=create_report(report),
+            file_name=report_filename(),
+            mime="application/pdf",
+        )
 
     st.divider()
 
     st.caption(
-        "RackMind AI v1.0 | Google ADK | Gemini | ChromaDB"
+        "RackMind AI | Google ADK | Gemini | OpenAI"
     )

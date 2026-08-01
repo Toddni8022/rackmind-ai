@@ -19,7 +19,6 @@ from config import (
     OPENAI_API_KEY,
     OPENAI_MODEL,
 )
-
 from services.logger import (
     error,
     info,
@@ -177,11 +176,13 @@ The demo dashboard can still run, but Gemini-powered responses require a valid G
                     f"Gemini unavailable. Retry {attempt + 1}/{retries}"
                 )
 
-                if attempt == retries - 1:
+                if attempt < retries - 1:
+                    time.sleep(2 ** (attempt + 1))
+                    continue
 
-                    error(str(ex))
+                error(str(ex))
 
-                    return f"""
+                return f"""
 # Gemini Service Busy
 
 The Gemini API is temporarily unavailable.
@@ -195,8 +196,6 @@ Reason:
 
 Please try again shortly.
 """
-
-                time.sleep(2)
 
             except Exception as ex:
 
@@ -255,10 +254,13 @@ The demo dashboard can still run, but OpenAI-powered responses require a valid O
                     f"OpenAI request failed. Retry {attempt + 1}/{retries}"
                 )
 
-                if attempt == retries - 1:
-                    error(str(ex))
+                if attempt < retries - 1:
+                    time.sleep(2 ** (attempt + 1))
+                    continue
 
-                    return f"""
+                error(str(ex))
+
+                return f"""
 # OpenAI Service Error
 
 Model:
@@ -268,8 +270,6 @@ Reason:
 
 {str(ex)}
 """
-
-                time.sleep(2)
 
         return "No response returned."
 
