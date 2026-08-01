@@ -8,8 +8,8 @@ a single executive incident report.
 """
 
 from agents.log_agent import analyze_log_summary
-from agents.sensor_agent import analyze_sensor_data
 from agents.report_agent import generate_incident_report
+from agents.sensor_agent import analyze_sensor_data
 
 
 class IncidentService:

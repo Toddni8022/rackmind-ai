@@ -73,6 +73,17 @@ OPENAI_MODEL = _get_secret(
 OPENAI_API_KEY = _get_secret("OPENAI_API_KEY")
 
 # --------------------------------------------------
+# Anthropic Claude
+# --------------------------------------------------
+
+CLAUDE_MODEL = _get_secret(
+    "CLAUDE_MODEL",
+    "claude-opus-5",
+)
+
+ANTHROPIC_API_KEY = _get_secret("ANTHROPIC_API_KEY") or _get_secret("CLAUDE_API_KEY")
+
+# --------------------------------------------------
 # Google ADK
 # --------------------------------------------------
 
@@ -107,3 +118,14 @@ TEMP_CRITICAL = 90
 POWER_WARNING = 4.5
 
 CRC_WARNING = 5
+
+# --------------------------------------------------
+# Uploads
+# --------------------------------------------------
+
+MAX_UPLOAD_MB = float(
+    _get_secret(
+        "MAX_UPLOAD_MB",
+        20,
+    )
+)

@@ -6,10 +6,10 @@ Single-Prompt Incident Investigation
 
 import pandas as pd
 
+from services.gemini_service import generate
 from services.log_parser import parse_log
 from services.sensor_parser import parse_sensor_data
 from services.vector_service import search_runbooks
-from services.gemini_service import generate
 
 
 def investigate_incident(
@@ -43,7 +43,7 @@ def investigate_incident(
         "CRC high temperature cooling"
     )
 
-    runbook_context = "\n\n".join(docs)
+    runbook_context = "\n\n".join(docs) or "No matching runbook guidance was found."
 
     # -----------------------------
     # Build ONE prompt

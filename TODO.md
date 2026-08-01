@@ -1,78 +1,52 @@
-\# RackMind AI Roadmap
+# RackMind AI Roadmap
 
+## Version 0.7
 
+### Complete
 
-\## Version 0.7
+- [x] Multi-page Streamlit UI
+- [x] Coordinator Agent
+- [x] Log Agent
+- [x] Runbook Agent
+- [x] Sensor Analytics
+- [x] Executive Report Agent
 
+---
 
+## Version 0.8
 
-\### Complete
+### Complete
 
+- [x] Google ADK Agent Objects
+- [x] PDF Incident Export (Log, Sensor, and Incident Commander tabs)
+- [x] TF-IDF Vector Runbook Search (ChromaDB-free)
+- [x] Offline CI with linting and tests
+- [x] Anthropic Claude provider support
 
+### Planned
 
-\- \[x] Multi-page Streamlit UI
+- [ ] MCP Server
+- [ ] Neural embeddings-based Runbook Search (external embeddings API)
 
-\- \[x] Coordinator Agent
+---
 
-\- \[x] Log Agent
+## Version 0.9
 
-\- \[x] Runbook Agent
+### Complete
 
-\- \[x] Sensor Analytics
+- [x] Historical Incident Search
 
-\- \[x] Executive Report Agent
+### Planned
 
+- [ ] Authentication
+- [ ] Live Infrastructure Dashboard
+- [ ] Hugging Face Deployment
 
+---
 
-\---
+## Version 1.0
 
-
-
-\## Version 0.8
-
-
-
-\- \[ ] Google ADK Agent Objects
-
-\- \[ ] MCP Server
-
-\- \[ ] ChromaDB Runbook Search
-
-\- \[ ] PDF Incident Export
-
-
-
-\---
-
-
-
-\## Version 0.9
-
-
-
-\- \[ ] Authentication
-
-\- \[ ] Historical Incident Search
-
-\- \[ ] Live Infrastructure Dashboard
-
-\- \[ ] Hugging Face Deployment
-
-
-
-\---
-
-
-
-\## Version 1.0
-
-
-
-\- \[ ] Kaggle Submission
-
-\- \[ ] Demo Video
-
-\- \[ ] Architecture Diagram
-
-\- \[ ] Portfolio Polish
-
+- [ ] Kaggle Submission
+- [ ] Demo Video
+- [ ] Architecture Diagram
+- [ ] Portfolio Polish

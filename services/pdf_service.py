@@ -1,39 +1,56 @@
+"""
+RackMind AI
+
+PDF Report Service
+
+Renders an incident report to PDF bytes in memory so the
+Streamlit download button can serve it without touching disk.
+"""
+
 from datetime import datetime
-from reportlab.platypus import SimpleDocTemplate, Paragraph
+from io import BytesIO
+from xml.sax.saxutils import escape
+
 from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import Paragraph, SimpleDocTemplate, Spacer
 
 
-def create_report(report: str):
+def report_filename(now: datetime | None = None) -> str:
+    """Return a timestamped filename for the downloaded report."""
 
-    filename = (
-        f"Incident_Report_"
-        f"{datetime.now():%Y%m%d_%H%M%S}.pdf"
-    )
+    stamp = now or datetime.now()
+    return f"Incident_Report_{stamp:%Y%m%d_%H%M%S}.pdf"
 
-    pdf = SimpleDocTemplate(filename)
 
+def create_report(report: str, title: str = "RackMind AI Executive Incident Report") -> bytes:
+    """
+    Render the report text as PDF bytes.
+
+    The text is XML-escaped first because ReportLab paragraphs
+    parse inline markup, and raw '&' or '<' characters from an
+    AI-generated report would otherwise crash the build.
+    """
+
+    buffer = BytesIO()
+    pdf = SimpleDocTemplate(buffer)
     styles = getSampleStyleSheet()
 
-    story = []
-
-    story.append(
+    story = [
         Paragraph(
-            "RackMind AI Executive Incident Report",
+            escape(title),
             styles["Heading1"],
-        )
-    )
-
-    story.append(
+        ),
         Paragraph(
             datetime.now().strftime("%Y-%m-%d %H:%M"),
             styles["Normal"],
-        )
-    )
-
-    story.append(
-        Paragraph(report.replace("\n", "<br/>"), styles["BodyText"])
-    )
+        ),
+        Spacer(1, 12),
+        Paragraph(
+            escape(report).replace("\n", "<br/>"),
+            styles["BodyText"],
+        ),
+    ]
 
     pdf.build(story)
 
-    return filename
+    return buffer.getvalue()

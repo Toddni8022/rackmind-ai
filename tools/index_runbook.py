@@ -7,8 +7,7 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from services.vector_service import add_runbook
-from services.vector_service import collection
+from services.vector_service import add_runbook, collection
 
 RUNBOOK = Path("sample_data/runbooks/sample_runbook.txt")
 

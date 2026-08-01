@@ -12,14 +12,13 @@ import pandas as pd
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
-from google.genai import types
 from google.adk.runners import Runner
 from google.adk.sessions import InMemorySessionService
+from google.genai import types
 
-from adk.root_agent import root_agent
 from adk.incident_tool import investigate_incident
-
-from services.logger import info, error
+from adk.root_agent import root_agent
+from services.logger import error, info
 
 APP_NAME = "rackmind-ai"
 USER_ID = "streamlit"

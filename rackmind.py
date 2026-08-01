@@ -1,10 +1,12 @@
 import streamlit as st
 
-from pages.dashboard import show_dashboard
-from pages.runbook import show_runbook
-from pages.logs import show_logs
-from pages.sensors import show_sensors
-from pages.incident import show_incident
+from views.dashboard import show_dashboard
+from views.history import show_history
+from views.incident import show_incident
+from views.logs import show_logs
+from views.runbook import show_runbook
+from views.sensors import show_sensors
+from views.topology import show_topology
 
 st.set_page_config(
     page_title="RackMind AI",
@@ -15,27 +17,28 @@ st.set_page_config(
 st.title("🖥️ RackMind AI")
 st.caption("Autonomous Data Center Operations Copilot")
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(
+tabs = st.tabs(
     [
         "🏠 Dashboard",
         "📄 Runbook",
         "📜 Log Agent",
         "📊 Sensor Agent",
         "🚨 Incident Commander",
+        "🗺️ Topology",
+        "🗂️ History",
     ]
 )
 
-with tab1:
-    show_dashboard()
+views = (
+    show_dashboard,
+    show_runbook,
+    show_logs,
+    show_sensors,
+    show_incident,
+    show_topology,
+    show_history,
+)
 
-with tab2:
-    show_runbook()
-
-with tab3:
-    show_logs()
-
-with tab4:
-    show_sensors()
-
-with tab5:
-    show_incident()
+for tab, view in zip(tabs, views):
+    with tab:
+        view()

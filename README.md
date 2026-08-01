@@ -2,7 +2,7 @@
 
 ## Data Center Operations Copilot
 
-RackMind AI is a Streamlit-based AI operations assistant for data center incident review. It analyzes switch logs, rack sensor telemetry, and runbook guidance, then uses either Google Gemini or OpenAI to produce a clear executive-style incident report.
+RackMind AI is a Streamlit-based AI operations assistant for data center incident review. It analyzes switch logs, rack sensor telemetry, and runbook guidance, then uses Google Gemini, OpenAI, or Anthropic Claude to produce a clear executive-style incident report.
 
 This project is built around a real infrastructure workflow: CRC errors, interface resets, temperature events, rack power draw, runbook lookup, and escalation recommendations.
 
@@ -24,14 +24,17 @@ RackMind AI helps an operator answer questions like:
 ## Key Features
 
 - Multi-page Streamlit dashboard
-- Gemini or OpenAI incident report generation
-- Provider selection with `AI_PROVIDER=auto`, `gemini`, or `openai`
+- Gemini, OpenAI, or Claude incident report generation
+- Provider selection with `AI_PROVIDER=auto`, `gemini`, `openai`, or `claude`
 - Coordinator agent that routes work to specialized agents
 - Log agent for switch warnings, errors, CRC events, resets, and temperatures
 - Sensor agent for temperature, humidity, and power telemetry
-- Runbook search workflow
+- TF-IDF vector search over runbooks (real cosine-similarity ranking, no external embeddings API)
+- Historical incident search over past resolved incidents
+- PDF export on the Log, Sensor, and Incident Commander tabs
 - Defensive parsing so missing CSV fields do not crash the app
 - Clear fallback messages when API keys are missing or mismatched
+- Upload size limit to keep parsing responsive on oversized files
 
 ---
 
@@ -60,7 +63,7 @@ RackMind Coordinator Agent
       |
       +--> Report Agent
               - Combines logs, sensors, and runbooks
-              - Uses Gemini or OpenAI to generate an executive report
+              - Uses Gemini, OpenAI, or Claude to generate an executive report
 ```
 
 ---
@@ -72,6 +75,7 @@ RackMind Coordinator Agent
 - Pandas
 - Google Gemini
 - OpenAI
+- Anthropic Claude
 - Google ADK
 - RAG-style runbook retrieval
 - GitHub
@@ -91,23 +95,34 @@ rackmind-ai/
     runbook_agent.py       # Runbook Q&A agent
     report_agent.py        # Incident report agent
 
-  pages/
+  adk/
+    root_agent.py          # Google ADK coordinator agent
+    chat.py                # ADK runner used by the UI
+    incident_tool.py       # Single-prompt incident investigation
+
+  views/
     dashboard.py           # Dashboard tab
     logs.py                # Log analysis tab
     sensors.py             # Sensor analytics tab
     runbook.py             # Runbook search tab
     incident.py            # Incident commander tab
-    topology.py            # Topology view
+    topology.py            # Topology tab
+    history.py             # Historical incident search tab
 
   services/
-    gemini_service.py      # Central AI provider service
-    log_parser.py          # Log parser
+    gemini_service.py      # Central AI provider service (Gemini + OpenAI + Claude)
+    log_parser.py          # Deterministic log parser + health score
     sensor_parser.py       # Sensor CSV parser
-    vector_service.py      # Runbook search service
+    vector_service.py      # TF-IDF vector runbook search service
+    incident_history.py    # Historical incident parser + search
     incident_service.py    # Incident coordination service
+    pdf_service.py         # In-memory PDF report export
+    upload_guard.py        # Upload size limit enforcement
     logger.py              # App logging
 
-  data/                    # Sample logs, sensors, and runbooks
+  tests/                   # Offline unit tests (no API keys needed)
+  sample_data/             # Sample sensors and runbooks
+  data/                    # Sample logs and telemetry
   .streamlit/              # Streamlit settings
 ```
 
@@ -146,7 +161,11 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Create a local `.env` file.
+Create a local `.env` file (start from the provided template):
+
+```bash
+cp .env.example .env
+```
 
 For automatic provider selection:
 
@@ -170,6 +189,14 @@ For OpenAI only:
 AI_PROVIDER=openai
 OPENAI_API_KEY=your_openai_key_here
 OPENAI_MODEL=gpt-5.5
+```
+
+For Claude only:
+
+```text
+AI_PROVIDER=claude
+ANTHROPIC_API_KEY=your_anthropic_key_here
+CLAUDE_MODEL=claude-opus-5
 ```
 
 Run the app:
@@ -208,32 +235,46 @@ GOOGLE_API_KEY = "your_google_ai_studio_key_here"
 GEMINI_MODEL = "gemini-2.5-flash"
 ```
 
+Claude:
+
+```toml
+AI_PROVIDER = "claude"
+ANTHROPIC_API_KEY = "your_anthropic_key_here"
+CLAUDE_MODEL = "claude-opus-5"
+```
+
 Auto mode:
 
 ```toml
 AI_PROVIDER = "auto"
 OPENAI_API_KEY = "your_openai_key_here"
 GOOGLE_API_KEY = "your_google_ai_studio_key_here"
+ANTHROPIC_API_KEY = "your_anthropic_key_here"
 OPENAI_MODEL = "gpt-5.5"
 GEMINI_MODEL = "gemini-2.5-flash"
+CLAUDE_MODEL = "claude-opus-5"
 ```
 
 ## Verification and Limitations
 
-The deterministic parsers can be verified without sending infrastructure data to an AI provider:
+The deterministic parsers, agents, runbook search, and PDF export can be verified without sending infrastructure data to an AI provider:
 
 ```bash
 pip install -r requirements-test.txt
+ruff check .
 python -m pytest -q
 ```
+
+The same checks run in CI on every push and pull request.
 
 - AI root-cause summaries are hypotheses and must be checked against live device state.
 - Thresholds and sample data demonstrate a workflow; they are not a substitute for facility alarm policy.
 - The project does not connect directly to production switches, BMS, DCIM, paging, or ticketing systems.
+- Uploaded logs and sensor CSVs are capped at `MAX_UPLOAD_MB` (default 20 MB) to keep parsing responsive.
 
-In auto mode, RackMind uses OpenAI when `OPENAI_API_KEY` is present. If no OpenAI key is present, it falls back to Gemini when a Google key is present.
+In auto mode, RackMind uses OpenAI when `OPENAI_API_KEY` is present. If no OpenAI key is present, it falls back to Claude when an Anthropic key is present, then to Gemini when a Google key is present.
 
-A valid Gemini key usually starts with `AIza`. A valid OpenAI key usually starts with `sk-`.
+A valid Gemini key usually starts with `AIza`. A valid OpenAI key usually starts with `sk-`. A valid Anthropic key usually starts with `sk-ant-`.
 
 ---
 
@@ -258,7 +299,7 @@ The parser also accepts common variations such as `temp`, `temp_f`, `rack_temper
 2. Upload rack sensor CSV data.
 3. RackMind parses logs and telemetry.
 4. The runbook workflow retrieves relevant guidance.
-5. Gemini or OpenAI generates an executive incident report with:
+5. Gemini, OpenAI, or Claude generates an executive incident report with:
    - Executive summary
    - Root cause
    - Business impact
