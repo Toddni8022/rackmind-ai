@@ -22,7 +22,7 @@ def report_filename(now: datetime | None = None) -> str:
     return f"Incident_Report_{stamp:%Y%m%d_%H%M%S}.pdf"
 
 
-def create_report(report: str) -> bytes:
+def create_report(report: str, title: str = "RackMind AI Executive Incident Report") -> bytes:
     """
     Render the report text as PDF bytes.
 
@@ -37,7 +37,7 @@ def create_report(report: str) -> bytes:
 
     story = [
         Paragraph(
-            "RackMind AI Executive Incident Report",
+            escape(title),
             styles["Heading1"],
         ),
         Paragraph(

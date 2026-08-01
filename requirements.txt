@@ -6,4 +6,5 @@ google-genai
 google-adk
 openai
 anthropic
+scikit-learn
 reportlab

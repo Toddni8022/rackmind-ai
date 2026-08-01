@@ -29,9 +29,12 @@ RackMind AI helps an operator answer questions like:
 - Coordinator agent that routes work to specialized agents
 - Log agent for switch warnings, errors, CRC events, resets, and temperatures
 - Sensor agent for temperature, humidity, and power telemetry
-- Runbook search workflow
+- TF-IDF vector search over runbooks (real cosine-similarity ranking, no external embeddings API)
+- Historical incident search over past resolved incidents
+- PDF export on the Log, Sensor, and Incident Commander tabs
 - Defensive parsing so missing CSV fields do not crash the app
 - Clear fallback messages when API keys are missing or mismatched
+- Upload size limit to keep parsing responsive on oversized files
 
 ---
 
@@ -104,14 +107,17 @@ rackmind-ai/
     runbook.py             # Runbook search tab
     incident.py            # Incident commander tab
     topology.py            # Topology tab
+    history.py             # Historical incident search tab
 
   services/
     gemini_service.py      # Central AI provider service (Gemini + OpenAI + Claude)
     log_parser.py          # Deterministic log parser + health score
     sensor_parser.py       # Sensor CSV parser
-    vector_service.py      # Keyword runbook search service
+    vector_service.py      # TF-IDF vector runbook search service
+    incident_history.py    # Historical incident parser + search
     incident_service.py    # Incident coordination service
     pdf_service.py         # In-memory PDF report export
+    upload_guard.py        # Upload size limit enforcement
     logger.py              # App logging
 
   tests/                   # Offline unit tests (no API keys needed)
@@ -264,6 +270,7 @@ The same checks run in CI on every push and pull request.
 - AI root-cause summaries are hypotheses and must be checked against live device state.
 - Thresholds and sample data demonstrate a workflow; they are not a substitute for facility alarm policy.
 - The project does not connect directly to production switches, BMS, DCIM, paging, or ticketing systems.
+- Uploaded logs and sensor CSVs are capped at `MAX_UPLOAD_MB` (default 20 MB) to keep parsing responsive.
 
 In auto mode, RackMind uses OpenAI when `OPENAI_API_KEY` is present. If no OpenAI key is present, it falls back to Claude when an Anthropic key is present, then to Gemini when a Google key is present.
 

@@ -57,3 +57,30 @@ def test_chroma_style_query_wrapper(tmp_path):
     collection = _collection(tmp_path, {"power": "UPS bypass procedure."})
     result = collection.query(query_texts=["UPS bypass"], n_results=2)
     assert result == {"documents": [["UPS bypass procedure."]]}
+
+
+def test_tfidf_ranks_focused_document_over_generic_document_mentioning_same_terms(tmp_path):
+    """
+    A short document squarely about the query topic should outrank a
+    long, mostly-unrelated document that only name-drops the same
+    terms once -- the ranking quality naive keyword counting can't
+    provide, since counting only checks term presence, not how much
+    of a document's content is actually about that term.
+    """
+    collection = _collection(
+        tmp_path,
+        {
+            "sfp_focused": "Replace the SFP transceiver module when interface errors persist.",
+            "power_generic": (
+                "Power distribution units regulate voltage across multiple racks. "
+                "Firmware updates should be scheduled during maintenance windows. "
+                "Monitor breaker status and confirm redundant power feeds. "
+                "An SFP transceiver was noted in inventory records for reference."
+            ),
+        },
+    )
+
+    results = collection.search("SFP transceiver issue", limit=2)
+
+    assert len(results) == 2
+    assert "Replace the SFP transceiver module" in results[0]

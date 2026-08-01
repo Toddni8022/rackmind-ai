@@ -10,7 +10,6 @@ import time
 
 from dotenv import load_dotenv
 from google import genai
-from google.genai.errors import ServerError
 
 from config import (
     AI_PROVIDER,
@@ -183,16 +182,23 @@ class AIService:
 
         return self._generate_gemini(prompt, retries)
 
-    def _generate_gemini(
+    def _generate_with_retries(
         self,
-        prompt: str,
+        *,
+        provider_label: str,
+        model: str,
+        get_client,
+        call,
         retries: int,
     ) -> str:
-
-        info(f"Gemini request using {self.gemini_model}")
+        """
+        Shared request lifecycle for every provider: resolve a client,
+        call the provider-specific request, and retry failures with
+        exponential backoff before returning a formatted error.
+        """
 
         try:
-            client = self._get_gemini_client()
+            client = get_client()
         except Exception as ex:
             warning(str(ex))
 
@@ -201,29 +207,18 @@ class AIService:
 
 {str(ex)}
 
-The demo dashboard can still run, but Gemini-powered responses require a valid Google API key.
+The demo dashboard can still run, but {provider_label}-powered responses require a valid API key.
 """
 
         for attempt in range(retries):
 
             try:
+                return call(client)
 
-                response = client.models.generate_content(
-                    model=self.gemini_model,
-                    contents=prompt,
-                )
-
-                info("Gemini request completed successfully.")
-
-                if not response.text:
-                    return "Gemini returned an empty response. Try again."
-
-                return response.text
-
-            except ServerError as ex:
+            except Exception as ex:
 
                 warning(
-                    f"Gemini unavailable. Retry {attempt + 1}/{retries}"
+                    f"{provider_label} request failed. Retry {attempt + 1}/{retries}"
                 )
 
                 if attempt < retries - 1:
@@ -233,31 +228,46 @@ The demo dashboard can still run, but Gemini-powered responses require a valid G
                 error(str(ex))
 
                 return f"""
-# Gemini Service Busy
-
-The Gemini API is temporarily unavailable.
+# {provider_label} Service Error
 
 Model:
-{self.gemini_model}
+{model}
 
 Reason:
-
-{str(ex)}
-
-Please try again shortly.
-"""
-
-            except Exception as ex:
-
-                error(str(ex))
-
-                return f"""
-# AI Service Error
 
 {str(ex)}
 """
 
         return "No response returned."
+
+    def _generate_gemini(
+        self,
+        prompt: str,
+        retries: int,
+    ) -> str:
+
+        info(f"Gemini request using {self.gemini_model}")
+
+        def call(client):
+            response = client.models.generate_content(
+                model=self.gemini_model,
+                contents=prompt,
+            )
+
+            info("Gemini request completed successfully.")
+
+            if not response.text:
+                return "Gemini returned an empty response. Try again."
+
+            return response.text
+
+        return self._generate_with_retries(
+            provider_label="Gemini",
+            model=self.gemini_model,
+            get_client=self._get_gemini_client,
+            call=call,
+            retries=retries,
+        )
 
     def _generate_openai(
         self,
@@ -267,61 +277,28 @@ Please try again shortly.
 
         info(f"OpenAI request using {self.openai_model}")
 
-        try:
-            client = self._get_openai_client()
-        except Exception as ex:
-            warning(str(ex))
+        def call(client):
+            response = client.responses.create(
+                model=self.openai_model,
+                input=prompt,
+            )
 
-            return f"""
-# AI Service Not Configured
+            info("OpenAI request completed successfully.")
 
-{str(ex)}
+            text = getattr(response, "output_text", None)
 
-The demo dashboard can still run, but OpenAI-powered responses require a valid OpenAI API key.
-"""
+            if text:
+                return text
 
-        for attempt in range(retries):
+            return self._extract_openai_text(response)
 
-            try:
-
-                response = client.responses.create(
-                    model=self.openai_model,
-                    input=prompt,
-                )
-
-                info("OpenAI request completed successfully.")
-
-                text = getattr(response, "output_text", None)
-
-                if text:
-                    return text
-
-                return self._extract_openai_text(response)
-
-            except Exception as ex:
-
-                warning(
-                    f"OpenAI request failed. Retry {attempt + 1}/{retries}"
-                )
-
-                if attempt < retries - 1:
-                    time.sleep(2 ** (attempt + 1))
-                    continue
-
-                error(str(ex))
-
-                return f"""
-# OpenAI Service Error
-
-Model:
-{self.openai_model}
-
-Reason:
-
-{str(ex)}
-"""
-
-        return "No response returned."
+        return self._generate_with_retries(
+            provider_label="OpenAI",
+            model=self.openai_model,
+            get_client=self._get_openai_client,
+            call=call,
+            retries=retries,
+        )
 
     def _generate_claude(
         self,
@@ -331,68 +308,35 @@ Reason:
 
         info(f"Claude request using {self.claude_model}")
 
-        try:
-            client = self._get_claude_client()
-        except Exception as ex:
-            warning(str(ex))
+        def call(client):
+            response = client.messages.create(
+                model=self.claude_model,
+                max_tokens=4096,
+                messages=[{"role": "user", "content": prompt}],
+            )
 
-            return f"""
-# AI Service Not Configured
+            info("Claude request completed successfully.")
 
-{str(ex)}
+            if response.stop_reason == "refusal":
+                return "Claude declined to respond to this request."
 
-The demo dashboard can still run, but Claude-powered responses require a valid Anthropic API key.
-"""
+            text = next(
+                (block.text for block in response.content if block.type == "text"),
+                "",
+            )
 
-        for attempt in range(retries):
+            if not text:
+                return "Claude returned an empty response. Try again."
 
-            try:
+            return text
 
-                response = client.messages.create(
-                    model=self.claude_model,
-                    max_tokens=4096,
-                    messages=[{"role": "user", "content": prompt}],
-                )
-
-                info("Claude request completed successfully.")
-
-                if response.stop_reason == "refusal":
-                    return "Claude declined to respond to this request."
-
-                text = next(
-                    (block.text for block in response.content if block.type == "text"),
-                    "",
-                )
-
-                if not text:
-                    return "Claude returned an empty response. Try again."
-
-                return text
-
-            except Exception as ex:
-
-                warning(
-                    f"Claude request failed. Retry {attempt + 1}/{retries}"
-                )
-
-                if attempt < retries - 1:
-                    time.sleep(2 ** (attempt + 1))
-                    continue
-
-                error(str(ex))
-
-                return f"""
-# Claude Service Error
-
-Model:
-{self.claude_model}
-
-Reason:
-
-{str(ex)}
-"""
-
-        return "No response returned."
+        return self._generate_with_retries(
+            provider_label="Claude",
+            model=self.claude_model,
+            get_client=self._get_claude_client,
+            call=call,
+            retries=retries,
+        )
 
     @staticmethod
     def _extract_openai_text(response) -> str:

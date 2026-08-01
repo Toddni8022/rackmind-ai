@@ -18,21 +18,27 @@
 ### Complete
 
 - [x] Google ADK Agent Objects
-- [x] PDF Incident Export
-- [x] Keyword Runbook Search (ChromaDB-free)
+- [x] PDF Incident Export (Log, Sensor, and Incident Commander tabs)
+- [x] TF-IDF Vector Runbook Search (ChromaDB-free)
 - [x] Offline CI with linting and tests
+- [x] Anthropic Claude provider support
 
 ### Planned
 
 - [ ] MCP Server
-- [ ] ChromaDB / embedding-based Runbook Search
+- [ ] Neural embeddings-based Runbook Search (external embeddings API)
 
 ---
 
 ## Version 0.9
 
+### Complete
+
+- [x] Historical Incident Search
+
+### Planned
+
 - [ ] Authentication
-- [ ] Historical Incident Search
 - [ ] Live Infrastructure Dashboard
 - [ ] Hugging Face Deployment
 

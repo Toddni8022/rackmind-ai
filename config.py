@@ -118,3 +118,14 @@ TEMP_CRITICAL = 90
 POWER_WARNING = 4.5
 
 CRC_WARNING = 5
+
+# --------------------------------------------------
+# Uploads
+# --------------------------------------------------
+
+MAX_UPLOAD_MB = float(
+    _get_secret(
+        "MAX_UPLOAD_MB",
+        20,
+    )
+)

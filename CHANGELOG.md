@@ -1,5 +1,28 @@
 # Changelog
 
+## v0.9
+
+### Added
+
+- Anthropic Claude as a third AI provider (`AI_PROVIDER=claude`), with the
+  same key-mismatch detection and graceful degradation as Gemini and OpenAI
+- Historical Incident Search tab over past resolved incidents
+- PDF export on the Log Agent and Sensor Agent tabs (previously only on
+  Incident Commander)
+- Upload size guard (`MAX_UPLOAD_MB`, default 20 MB) with a friendly
+  rejection message instead of stalling on oversized files
+- Test coverage for the AI-dependent agents (runbook Q&A, executive
+  report generation, single-prompt incident investigation) via a mocked
+  AI client
+
+### Changed
+
+- Runbook search now uses TF-IDF vectors and cosine similarity instead of
+  naive keyword-presence counting, so ranking reflects real topical
+  relevance rather than raw term overlap
+- The three AI providers' retry/backoff/error-formatting logic is now a
+  single shared helper instead of three near-duplicate implementations
+
 ## v0.8
 
 ### Added

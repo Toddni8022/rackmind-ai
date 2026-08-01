@@ -2,7 +2,9 @@ import pandas as pd
 import streamlit as st
 
 from agents.coordinator import coordinate_sensor_workflow
+from services.pdf_service import create_report, report_filename
 from services.sensor_parser import normalize_sensor_dataframe, parse_sensor_data
+from services.upload_guard import exceeds_upload_limit, upload_limit_message
 
 
 def _metric_value(value, suffix=""):
@@ -26,6 +28,10 @@ def show_sensors():
 
     if sensor_file is None:
         st.info("Upload a sensor CSV to begin analysis.")
+        return
+
+    if exceeds_upload_limit(sensor_file):
+        st.error(upload_limit_message(sensor_file))
         return
 
     try:
@@ -94,6 +100,13 @@ def show_sensors():
         report = coordinate_sensor_workflow(summary)
 
     st.markdown(report)
+
+    st.download_button(
+        label="📄 Download Report as PDF",
+        data=create_report(report, title="RackMind AI Sensor Analysis Report"),
+        file_name=report_filename(),
+        mime="application/pdf",
+    )
 
     st.divider()
 

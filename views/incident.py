@@ -3,6 +3,7 @@ import streamlit as st
 
 from adk.chat import investigate
 from services.pdf_service import create_report, report_filename
+from services.upload_guard import exceeds_upload_limit, upload_limit_message
 
 
 def show_incident():
@@ -36,6 +37,14 @@ def show_incident():
 
         if sensor_file is None:
             st.warning("Please upload a sensor CSV.")
+            return
+
+        if exceeds_upload_limit(log_file):
+            st.error(upload_limit_message(log_file))
+            return
+
+        if exceeds_upload_limit(sensor_file):
+            st.error(upload_limit_message(sensor_file))
             return
 
         log_text = log_file.read().decode("utf-8", errors="replace")

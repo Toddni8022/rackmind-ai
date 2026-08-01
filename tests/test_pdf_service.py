@@ -12,6 +12,16 @@ def test_create_report_survives_markup_characters():
     assert pdf.startswith(b"%PDF")
 
 
+def test_create_report_accepts_custom_title():
+    pdf = create_report("All clear.", title="RackMind AI Log Analysis Report")
+    assert pdf.startswith(b"%PDF")
+
+
+def test_create_report_escapes_markup_in_custom_title():
+    pdf = create_report("All clear.", title="Sensors & <Racks>")
+    assert pdf.startswith(b"%PDF")
+
+
 def test_report_filename_is_timestamped_pdf():
     from datetime import datetime
 

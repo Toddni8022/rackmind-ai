@@ -1,6 +1,7 @@
 import streamlit as st
 
 from views.dashboard import show_dashboard
+from views.history import show_history
 from views.incident import show_incident
 from views.logs import show_logs
 from views.runbook import show_runbook
@@ -24,6 +25,7 @@ tabs = st.tabs(
         "📊 Sensor Agent",
         "🚨 Incident Commander",
         "🗺️ Topology",
+        "🗂️ History",
     ]
 )
 
@@ -34,6 +36,7 @@ views = (
     show_sensors,
     show_incident,
     show_topology,
+    show_history,
 )
 
 for tab, view in zip(tabs, views):

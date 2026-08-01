@@ -3,4 +3,5 @@ pytest>=8,<9
 python-dotenv>=1,<2
 reportlab>=4,<5
 anthropic>=0.40
+scikit-learn>=1.4,<2
 ruff>=0.5

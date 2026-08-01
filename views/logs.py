@@ -2,6 +2,8 @@ import streamlit as st
 
 from agents.coordinator import coordinate_log_workflow
 from services.log_parser import build_log_timeline, compute_health_score, parse_log
+from services.pdf_service import create_report, report_filename
+from services.upload_guard import exceeds_upload_limit, upload_limit_message
 
 
 def show_logs():
@@ -17,6 +19,10 @@ def show_logs():
 
     if logfile is None:
         st.info("Upload a switch log to begin analysis.")
+        return
+
+    if exceeds_upload_limit(logfile):
+        st.error(upload_limit_message(logfile))
         return
 
     st.success(f"Loaded: {logfile.name}")
@@ -86,3 +92,10 @@ def show_logs():
             report = coordinate_log_workflow(summary)
 
         st.markdown(report)
+
+        st.download_button(
+            label="📄 Download Report as PDF",
+            data=create_report(report, title="RackMind AI Log Analysis Report"),
+            file_name=report_filename(),
+            mime="application/pdf",
+        )
