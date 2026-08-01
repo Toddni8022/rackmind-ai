@@ -2,4 +2,5 @@ pandas>=2.2,<4
 pytest>=8,<9
 python-dotenv>=1,<2
 reportlab>=4,<5
+anthropic>=0.40
 ruff>=0.5
