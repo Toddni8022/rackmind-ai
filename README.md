@@ -180,6 +180,10 @@ Run the app:
 streamlit run rackmind.py
 ```
 
+### Sharing safely
+
+RackMind supports optional username/password authentication. Set `RACKMIND_USERS` to a JSON object whose values are SHA-256 password hashes in your local `.env` file or Streamlit secrets. Leave it unset for the synthetic-data demo mode. Uploads are limited to 10 MB, and operator actions are written to `logs/audit.jsonl` on the deployment volume.
+
 ---
 
 ## Streamlit Cloud Deployment
@@ -237,6 +241,8 @@ pip install -r requirements-test.txt
 python -m pytest -q
 ```
 
+The readiness check can be run with `python healthcheck.py`. Continuous integration also compiles the application, runs the full test suite, and runs `pip-audit` against the pinned dependencies.
+
 - AI root-cause summaries are hypotheses and must be checked against live device state.
 - Thresholds and sample data demonstrate a workflow; they are not a substitute for facility alarm policy.
 - The project does not connect directly to production switches, BMS, DCIM, paging, or ticketing systems.
@@ -292,7 +298,7 @@ The parser also accepts common variations such as `temp`, `temp_f`, `rack_temper
 
 - PDF incident export
 - Historical incident search
-- Authentication
+- Role-based access controls beyond the operator login
 - Live infrastructure dashboard
 - Multi-rack monitoring
 - Trend analytics

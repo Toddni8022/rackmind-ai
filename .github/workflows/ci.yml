@@ -15,4 +15,7 @@ jobs:
           cache: pip
       - run: pip install -r requirements-test.txt
       - run: python -m compileall -q services agents tools pages
+      - run: python healthcheck.py
       - run: python -m pytest -q
+      - run: pip install pip-audit
+      - run: pip-audit -r requirements.txt
