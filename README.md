@@ -220,6 +220,14 @@ OPENAI_MODEL = "gpt-5.5"
 GEMINI_MODEL = "gemini-2.5-flash"
 ```
 
+## App snapshots
+
+These snapshots show RackMind AI using the bundled synthetic Rack 22 telemetry. They are safe to share and do not contain production facility data.
+
+![RackMind operations overview](docs/screenshots/overview.png)
+
+![RackMind sensor analysis](docs/screenshots/sensor-analysis.png)
+
 ## Verification and Limitations
 
 The deterministic parsers can be verified without sending infrastructure data to an AI provider:
