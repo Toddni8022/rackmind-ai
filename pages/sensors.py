@@ -3,6 +3,7 @@ import pandas as pd
 
 from agents.coordinator import coordinate_sensor_workflow
 from services.sensor_parser import normalize_sensor_dataframe, parse_sensor_data
+from services.audit import record
 
 
 def _metric_value(value, suffix=""):
@@ -29,7 +30,11 @@ def show_sensors():
         return
 
     try:
+        if getattr(sensor_file, "size", 0) > 10 * 1024 * 1024:
+            st.error("This upload exceeds the 10 MB safety limit.")
+            return
         df = pd.read_csv(sensor_file)
+        record("sensor_analysis", st.session_state.get("rackmind_user", "demo"), {"filename": sensor_file.name, "bytes": getattr(sensor_file, "size", 0)})
     except Exception as ex:
         st.error(f"Unable to read sensor CSV: {ex}")
         return

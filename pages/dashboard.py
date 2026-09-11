@@ -5,6 +5,7 @@ import streamlit as st
 from config import APP_NAME, APP_VERSION, SAMPLE_DIR, TEMP_WARNING, TEMP_CRITICAL, POWER_WARNING
 from services.telemetry_service import assess_telemetry, prepare_telemetry
 from services.interface import apply_design, overview_header, rack_overview
+from services.audit import record
 
 
 def _metric(value, unit):
@@ -16,11 +17,15 @@ def show_dashboard():
     overview_header()
     source = st.radio("Data source", ["Sample data", "Upload CSV"], horizontal=True, key="dashboard_source")
     if source == "Upload CSV":
-        upload = st.file_uploader("Upload rack telemetry", type=["csv"], key="dashboard_csv")
+        upload = st.file_uploader("Upload rack telemetry (max 10 MB)", type=["csv"], key="dashboard_csv")
         if upload is None:
             st.info("Upload a CSV with temperature (°F), humidity (%), or power_kw. Add a rack column to compare racks.")
             return
         csv_source, source_name = upload, upload.name
+        if getattr(upload, "size", 0) > 10 * 1024 * 1024:
+            st.error("This upload exceeds the 10 MB safety limit.")
+            return
+        record("telemetry_upload", st.session_state.get("rackmind_user", "demo"), {"filename": upload.name, "bytes": getattr(upload, "size", 0)})
         st.info("Uploaded snapshot · Assessment stays in this app and makes no AI provider calls.")
     else:
         csv_source = SAMPLE_DIR / "sensors" / "rack22.csv"

@@ -1,5 +1,5 @@
-pandas>=2.2,<4
-pytest>=8,<9
-streamlit
-plotly
-python-dotenv
+pandas==3.0.1
+pytest==8.4.2
+streamlit==1.63.0
+plotly==7.0.0
+python-dotenv==1.2.3

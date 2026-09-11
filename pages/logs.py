@@ -2,6 +2,7 @@ import streamlit as st
 
 from tools.log_reader import analyze_log
 from agents.coordinator import coordinate_log_workflow
+from services.audit import record
 
 
 def show_logs():
@@ -22,6 +23,10 @@ def show_logs():
     st.success(f"Loaded: {logfile.name}")
 
     if st.button("Analyze Log", use_container_width=True):
+        if getattr(logfile, "size", 0) > 10 * 1024 * 1024:
+            st.error("This upload exceeds the 10 MB safety limit.")
+            return
+        record("log_analysis", st.session_state.get("rackmind_user", "demo"), {"filename": logfile.name, "bytes": getattr(logfile, "size", 0)})
 
         with st.spinner("Reading infrastructure log..."):
 

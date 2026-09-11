@@ -1,5 +1,7 @@
 import streamlit as st
 from services.interface import apply_design, brand_header
+from services.auth import require_login, logout, current_role
+from services.audit import record
 
 from pages.dashboard import show_dashboard
 from pages.runbook import show_runbook
@@ -15,6 +17,13 @@ st.set_page_config(
 
 apply_design()
 brand_header()
+user = require_login()
+if user is None:
+    st.stop()
+if user != "demo":
+    st.caption(f"Signed in as **{user}** · role: **{current_role()}**")
+logout()
+record("session_view", user, {"page": "main"})
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(
     [

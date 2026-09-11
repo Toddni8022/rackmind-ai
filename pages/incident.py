@@ -3,6 +3,7 @@ import pandas as pd
 
 from adk.chat import investigate
 from services.pdf_service import create_report
+from services.audit import record
 
 
 def show_incident():
@@ -58,6 +59,7 @@ def show_incident():
                 log_text,
                 sensor_df,
             )
+            record("incident_analysis", st.session_state.get("rackmind_user", "demo"), {"log": log_file.name, "sensor": sensor_file.name})
 
         st.success(
             "Executive Incident Report"
