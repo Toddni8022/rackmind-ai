@@ -1,4 +1,5 @@
 import streamlit as st
+from services.interface import apply_design, brand_header
 
 from pages.dashboard import show_dashboard
 from pages.runbook import show_runbook
@@ -12,16 +13,16 @@ st.set_page_config(
     layout="wide",
 )
 
-st.title("🖥️ RackMind AI")
-st.caption("Autonomous Data Center Operations Copilot")
+apply_design()
+brand_header()
 
 tab1, tab2, tab3, tab4, tab5 = st.tabs(
     [
-        "🏠 Dashboard",
-        "📄 Runbook",
-        "📜 Log Agent",
-        "📊 Sensor Agent",
-        "🚨 Incident Commander",
+        "Overview",
+        "Runbook library",
+        "Network signals",
+        "Sensor analysis",
+        "Incident desk",
     ]
 )
 
