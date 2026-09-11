@@ -184,6 +184,8 @@ streamlit run rackmind.py
 
 RackMind supports Streamlit OIDC SSO with `RACKMIND_OIDC_PROVIDER`, or username/password authentication with `RACKMIND_USERS`. Set either in your local `.env` file or Streamlit secrets. Leave both unset for synthetic-data demo mode. Roles control viewing, analysis, uploads, and administration. Uploads are limited to 10 MB, and operator actions are written to `logs/audit.jsonl` on the deployment volume. Optional live JSON telemetry can be supplied through `RACKMIND_TELEMETRY_URL` and `RACKMIND_TELEMETRY_TOKEN`; the default workflow remains offline.
 
+For enterprise hosting, configure Streamlit's `[auth]` and `[auth.microsoft]` secrets with your Entra client ID, client secret, tenant metadata URL, callback URL, and a strong cookie secret. Set `RACKMIND_PROMETHEUS_URL` to a read-only Prometheus endpoint and `SENTRY_DSN` to the project DSN. The Prometheus adapter only performs read-only instant queries.
+
 ---
 
 ## Streamlit Cloud Deployment
