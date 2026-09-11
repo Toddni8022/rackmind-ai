@@ -21,12 +21,23 @@ def _users():
 
 
 def auth_enabled():
-    return bool(_users())
+    return bool(_users()) or bool(os.getenv("RACKMIND_OIDC_PROVIDER"))
 
 
 def require_login():
     """Render login when configured; return the current user or None."""
-    if not auth_enabled():
+    oidc_provider = os.getenv("RACKMIND_OIDC_PROVIDER", "").strip()
+    if oidc_provider and hasattr(st, "login") and hasattr(st, "user"):
+        if getattr(st.user, "is_logged_in", False):
+            username = getattr(st.user, "email", None) or getattr(st.user, "name", "oidc-user")
+            st.session_state.setdefault("rackmind_user", username)
+            st.session_state.setdefault("rackmind_role", role_for(username))
+            return username
+        st.info("Sign in with your organization account to continue.")
+        if st.button("Sign in with SSO", type="primary"):
+            st.login(oidc_provider)
+        return None
+    if not _users():
         return "demo"
     if st.session_state.get("rackmind_user"):
         return st.session_state["rackmind_user"]
@@ -48,6 +59,20 @@ def require_login():
 
 def current_role():
     return st.session_state.get("rackmind_role", "operator")
+
+
+def role_for(username):
+    entry = _users().get(username, {})
+    return entry.get("role", "operator") if isinstance(entry, dict) else "operator"
+
+
+def can(permission):
+    permissions = {
+        "viewer": {"view"},
+        "operator": {"view", "analyze", "upload"},
+        "admin": {"view", "analyze", "upload", "manage_users", "configure_integrations"},
+    }
+    return permission in permissions.get(current_role(), set())
 
 
 def logout():
