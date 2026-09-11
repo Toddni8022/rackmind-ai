@@ -6,6 +6,7 @@ from config import APP_NAME, APP_VERSION, SAMPLE_DIR, TEMP_WARNING, TEMP_CRITICA
 from services.telemetry_service import assess_telemetry, prepare_telemetry
 from services.interface import apply_design, overview_header, rack_overview
 from services.audit import record
+from services.auth import can
 
 
 def _metric(value, unit):
@@ -15,7 +16,8 @@ def _metric(value, unit):
 def show_dashboard():
     apply_design()
     overview_header()
-    source = st.radio("Data source", ["Sample data", "Upload CSV"], horizontal=True, key="dashboard_source")
+    sources = ["Sample data", "Upload CSV"] if can("upload") else ["Sample data"]
+    source = st.radio("Data source", sources, horizontal=True, key="dashboard_source")
     if source == "Upload CSV":
         upload = st.file_uploader("Upload rack telemetry (max 10 MB)", type=["csv"], key="dashboard_csv")
         if upload is None:

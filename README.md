@@ -182,7 +182,7 @@ streamlit run rackmind.py
 
 ### Sharing safely
 
-RackMind supports optional username/password authentication. Set `RACKMIND_USERS` to a JSON object whose values are SHA-256 password hashes in your local `.env` file or Streamlit secrets. Leave it unset for the synthetic-data demo mode. Uploads are limited to 10 MB, and operator actions are written to `logs/audit.jsonl` on the deployment volume.
+RackMind supports Streamlit OIDC SSO with `RACKMIND_OIDC_PROVIDER`, or username/password authentication with `RACKMIND_USERS`. Set either in your local `.env` file or Streamlit secrets. Leave both unset for synthetic-data demo mode. Roles control viewing, analysis, uploads, and administration. Uploads are limited to 10 MB, and operator actions are written to `logs/audit.jsonl` on the deployment volume. Optional live JSON telemetry can be supplied through `RACKMIND_TELEMETRY_URL` and `RACKMIND_TELEMETRY_TOKEN`; the default workflow remains offline.
 
 ---
 
@@ -298,7 +298,7 @@ The parser also accepts common variations such as `temp`, `temp_f`, `rack_temper
 
 - PDF incident export
 - Historical incident search
-- Role-based access controls beyond the operator login
+- Native SSO and fine-grained enterprise policy integration
 - Live infrastructure dashboard
 - Multi-rack monitoring
 - Trend analytics
