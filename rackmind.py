@@ -2,6 +2,7 @@ import streamlit as st
 from services.interface import apply_design, brand_header
 from services.auth import require_login, logout, current_role
 from services.audit import record
+from services.monitoring import initialize as initialize_monitoring
 
 from pages.dashboard import show_dashboard
 from pages.runbook import show_runbook
@@ -17,6 +18,7 @@ st.set_page_config(
 
 apply_design()
 brand_header()
+initialize_monitoring()
 user = require_login()
 if user is None:
     st.stop()
