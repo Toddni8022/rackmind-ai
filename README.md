@@ -24,6 +24,8 @@ RackMind AI helps an operator answer questions like:
 ## Key Features
 
 - Multi-page Streamlit dashboard
+- Dashboard CSV uploads with rack filtering, prioritized temperature/power alerts, and downloadable JSON reviews
+- Explicit sample/snapshot labels and missing-data warnings, with threshold lines on telemetry charts
 - Gemini or OpenAI incident report generation
 - Provider selection with `AI_PROVIDER=auto`, `gemini`, or `openai`
 - Coordinator agent that routes work to specialized agents
@@ -238,6 +240,16 @@ A valid Gemini key usually starts with `AIza`. A valid OpenAI key usually starts
 ---
 
 ## Sensor CSV Format
+
+### Dashboard telemetry review
+
+In **Dashboard**, choose **Sample data** or **Upload CSV**, then select the racks to review. The dashboard assesses the entire selected file window, not current live conditions. Charts preserve each rack's file order; timestamps are shown as supplied and are not checked for freshness.
+
+Temperature values are interpreted as Fahrenheit, humidity as percent, and power as kW. Use the column names and aliases below; a missing `rack` column groups readings under **Unspecified rack**. Use one column per metric. Ambiguous aliases and unsupported files show a validation error.
+
+Missing/non-numeric/infinite readings, humidity outside 0–100%, and negative power are excluded from dashboard metrics and counted as data-quality gaps. An incomplete rack cannot receive a Normal status; valid critical/warning signals remain visible alongside gaps. Normal means only that the demo temperature and power thresholds were not exceeded with complete metric coverage. Humidity has no alarm policy in this view.
+
+Dashboard thresholds come from `TEMP_WARNING`, `TEMP_CRITICAL`, and `POWER_WARNING` in `config.py`. They demonstrate a workflow and must be interpreted against facility policy. **Download review report** exports the selected racks, thresholds, alerts, and coverage as JSON. This dashboard review makes no AI provider calls; the existing AI tools are separate workflows.
 
 The sensor page works best with columns like:
 
