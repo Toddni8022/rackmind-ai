@@ -2,7 +2,7 @@
 from pathlib import Path
 import json
 import pandas as pd
-from rackmind_mcp.server.fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP
 from services.log_parser import parse_log, build_log_timeline
 from services.sensor_parser import parse_sensor_data
 from agents.log_agent import analyze_log_summary
