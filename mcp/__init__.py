@@ -1,1 +1,0 @@
-"""RackMind MCP integration package."""
