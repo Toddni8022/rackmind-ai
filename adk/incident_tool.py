@@ -5,6 +5,7 @@ Single-Prompt Incident Investigation
 """
 
 import pandas as pd
+import os
 
 from services.log_parser import parse_log
 from services.sensor_parser import parse_sensor_data
@@ -25,7 +26,16 @@ def investigate_incident(
     # Parse logs
     # -----------------------------
 
-    log_summary = parse_log(log)
+    use_mcp = os.getenv("RACKMIND_USE_MCP", "0").lower() in ("1", "true", "yes")
+    if use_mcp:
+        from rackmind_mcp.integration import analyze_incident
+        mcp_logs, mcp_sensors = analyze_incident(
+            log, pd.DataFrame(sensor_data).to_csv(index=False)
+        )
+        log_summary = mcp_logs["summary"]
+        sensor_summary = mcp_sensors["summary"]
+    else:
+        log_summary = parse_log(log)
 
     # -----------------------------
     # Parse sensors
@@ -33,7 +43,8 @@ def investigate_incident(
 
     sensor_df = pd.DataFrame(sensor_data)
 
-    sensor_summary = parse_sensor_data(sensor_df)
+    if not use_mcp:
+        sensor_summary = parse_sensor_data(sensor_df)
 
     # -----------------------------
     # Retrieve runbook context
@@ -52,7 +63,7 @@ def investigate_incident(
     prompt = f"""
 You are a senior data center engineer.
 
-Analyze the incident.
+Analyze the incident.\n\nData source: {"MCP tools over stdio" if use_mcp else "local Python parsers"}.
 
 =========================
 LOG SUMMARY
